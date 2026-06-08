@@ -1,0 +1,5 @@
+services:
+  fluid-simulator:
+    image: fluid-simulator:latest
+    container_name: fluid-simulator
+    restart: unless-stopped
