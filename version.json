@@ -1,6 +1,6 @@
 {
   "name": "Fluid-Dynamics-Simulator",
-  "version": "0.1.0",
-  "channel": "dev",
+  "version": "0.1.0-alpha",
+  "channel": "alpha",
   "build": 1
 }

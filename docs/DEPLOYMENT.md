@@ -2,7 +2,11 @@
 
 Pipeline:
 
-Push -> Pull Request -> Tests -> Build -> Artifact -> Release -> Raspberry Pi Deployment
+Push -> Pull Request -> Tests -> Build -> Tag -> Release -> Raspberry Pi Deployment
+
+Release tags:
+
+- v0.1.0-alpha
 
 Required GitHub Secrets:
 
