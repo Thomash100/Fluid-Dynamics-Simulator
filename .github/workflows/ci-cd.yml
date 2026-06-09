@@ -25,8 +25,8 @@ jobs:
 
       - name: Create artifact
         run: |
-          mkdir artifact
-          cp -r . artifact/project
+          mkdir -p artifact/project
+          git archive --format=tar HEAD | tar -x -C artifact/project
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -44,7 +44,7 @@ jobs:
 
       - name: Create Release Archive
         run: |
-          zip -r release.zip .
+          git archive --format=zip --output=release.zip HEAD
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
@@ -56,14 +56,23 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: release
     runs-on: ubuntu-latest
+    env:
+      RPI_HOST: ${{ secrets.RPI_HOST }}
+      RPI_USER: ${{ secrets.RPI_USER }}
+      RPI_SSH_KEY: ${{ secrets.RPI_SSH_KEY }}
 
     steps:
+      - name: Check deployment configuration
+        if: env.RPI_HOST == '' || env.RPI_USER == '' || env.RPI_SSH_KEY == ''
+        run: echo "Raspberry Pi deployment secrets are not configured; skipping deployment."
+
       - name: Deploy to Raspberry Pi
+        if: env.RPI_HOST != '' && env.RPI_USER != '' && env.RPI_SSH_KEY != ''
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.RPI_HOST }}
-          username: ${{ secrets.RPI_USER }}
-          key: ${{ secrets.RPI_SSH_KEY }}
+          host: ${{ env.RPI_HOST }}
+          username: ${{ env.RPI_USER }}
+          key: ${{ env.RPI_SSH_KEY }}
           script: |
             cd /opt/fluid-dynamics-simulator
             git pull
