@@ -16,7 +16,7 @@ Fluid Dynamics Simulator (FDS) ist eine Simulationsplattform für technische Geb
 
 Die erste Grundstruktur für `FDS.Core` ist vorhanden. Sie enthält Basismodelle für Netzwerke, Knoten, Kanten und Fluide sowie Unit Tests für die grundlegenden Validierungen.
 
-`FDS.Hydraulics` ist als nächstes Modul angelegt. Es enthält ein Rohrmodell und Einzelrohr-Berechnungen für Strömungsgeschwindigkeit, Reynoldszahl, einfache Reibungszahl-Abschätzung und vorbereiteten Darcy-Weisbach-Druckverlust. Es ist noch kein kompletter Netzwerksolver implementiert.
+`FDS.Hydraulics` ist als nächstes Modul angelegt. Es enthält ein Rohrmodell, Einzelrohr-Berechnungen für Strömungsgeschwindigkeit, Reynoldszahl, einfache Reibungszahl-Abschätzung und vorbereiteten Darcy-Weisbach-Druckverlust. Zusätzlich sind Armaturen-/Einzelwiderstandsmodelle mit Zeta-Druckverlust sowie ein Kv/Kvs-Grundmodell für Ventile vorbereitet. Es ist noch kein kompletter Netzwerksolver implementiert.
 
 ## Projektstruktur
 
@@ -31,9 +31,14 @@ src/
       Temperature.cs
   FDS.Hydraulics/
     Calculations/
+      LocalResistanceCalculator.cs
       PipeFlowCalculator.cs
     Models/
+      Fitting.cs
+      LocalResistance.cs
       Pipe.cs
+      Valve.cs
+      ValveFlowCoefficient.cs
 
 tests/
   FDS.Core.Tests/
@@ -56,6 +61,11 @@ tests/
 - Reynoldszahl aus Dichte, Geschwindigkeit, Durchmesser und dynamischer Viskosität.
 - Darcy-Reibungszahl: laminar `64/Re`, außerhalb des laminaren Bereichs einfache Blasius-Näherung.
 - Darcy-Weisbach-Druckverlust als vorbereitete Einzelrohrrechnung.
+- `LocalResistance`: Einzelwiderstand mit dimensionslosem Zeta-Wert.
+- `Fitting`: Armaturen-/Formstück-Grundmodell auf Basis eines Zeta-Werts.
+- `Valve`: Ventil-Grundmodell mit optionalem Zeta-Wert und optionalem Kv/Kvs-Datensatz.
+- Zeta-basierter Druckverlust als Einzelkomponentenrechnung.
+- Kv/Kvs-basierter Ventil-Druckverlust nach metrischer Kv-Konvention.
 
 ## Einheiten
 
@@ -72,6 +82,8 @@ tests/
 | Strömungsgeschwindigkeit | m/s | Ergebnis `CalculateVelocityMetersPerSecond` |
 | Reynoldszahl | dimensionslos | Ergebnis `CalculateReynoldsNumber` |
 | Druckverlust | Pa | Ergebnis `CalculateDarcyWeisbachPressureLossPascals` |
+| Zeta-Wert | dimensionslos | `LocalResistance.Zeta` |
+| Kv/Kvs | m³/h | `ValveFlowCoefficient` |
 
 ## Validierungen
 
@@ -86,6 +98,9 @@ tests/
 - Rohrinnendurchmesser muss größer als 0 sein.
 - Rohrrauheit darf nicht negativ sein.
 - Dynamische Viskosität muss größer als 0 sein.
+- Zeta-Werte dürfen nicht negativ sein.
+- Kv und Kvs müssen größer als 0 sein.
+- Kv darf nicht größer als Kvs sein.
 
 ## Nicht enthalten
 

@@ -23,13 +23,19 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 - Reynoldszahl
 - Darcy-Reibungszahl mit laminarer Formel und einfacher Blasius-Näherung
 - Darcy-Weisbach-Druckverlust als Einzelrohr-Hilfsrechnung
+- Modell `LocalResistance`
+- Modell `Fitting`
+- Modell `Valve`
+- Modell `ValveFlowCoefficient`
+- Zeta-Wert-basierter Druckverlust
+- Kv/Kvs-Grundmodell für Ventile
 - Unit Tests für Rohrmodell und hydraulische Berechnungen
 
 ## Nicht umgesetzt
 
 - Kein kompletter Netzwerksolver
 - Keine Pumpenkennlinie
-- Keine Ventilberechnung
+- Keine Regelventil-Auslegung
 - Keine UI
 
 ## Verifikation
@@ -38,4 +44,4 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 dotnet test FluidDynamicsSimulator.sln
 ```
 
-Ergebnis: 38 Tests bestanden.
+Ergebnis: 54 Tests bestanden.

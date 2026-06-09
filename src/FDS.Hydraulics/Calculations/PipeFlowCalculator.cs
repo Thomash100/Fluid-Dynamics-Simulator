@@ -1,4 +1,5 @@
 using FDS.Core.Models;
+using FDS.Hydraulics.Internal;
 using FDS.Hydraulics.Models;
 
 namespace FDS.Hydraulics.Calculations;
@@ -28,7 +29,7 @@ public static class PipeFlowCalculator
     /// </summary>
     public static double CalculateVelocityMetersPerSecond(Pipe pipe, double volumetricFlowRateCubicMetersPerSecond)
     {
-        EnsureFinite(volumetricFlowRateCubicMetersPerSecond, nameof(volumetricFlowRateCubicMetersPerSecond));
+        HydraulicValidation.EnsureFinite(volumetricFlowRateCubicMetersPerSecond, nameof(volumetricFlowRateCubicMetersPerSecond));
 
         return volumetricFlowRateCubicMetersPerSecond / CalculateCrossSectionalAreaSquareMeters(pipe);
     }
@@ -44,7 +45,7 @@ public static class PipeFlowCalculator
         double dynamicViscosityPascalSeconds)
     {
         ArgumentNullException.ThrowIfNull(fluid);
-        EnsurePositiveFinite(dynamicViscosityPascalSeconds, nameof(dynamicViscosityPascalSeconds));
+        HydraulicValidation.EnsurePositiveFinite(dynamicViscosityPascalSeconds, nameof(dynamicViscosityPascalSeconds));
 
         var velocityMetersPerSecond = CalculateVelocityMetersPerSecond(pipe, volumetricFlowRateCubicMetersPerSecond);
 
@@ -60,7 +61,7 @@ public static class PipeFlowCalculator
     /// </summary>
     public static double EstimateDarcyFrictionFactor(double reynoldsNumber)
     {
-        EnsurePositiveFinite(reynoldsNumber, nameof(reynoldsNumber));
+        HydraulicValidation.EnsurePositiveFinite(reynoldsNumber, nameof(reynoldsNumber));
 
         if (reynoldsNumber < LaminarReynoldsLimit)
         {
@@ -83,7 +84,7 @@ public static class PipeFlowCalculator
     {
         ArgumentNullException.ThrowIfNull(pipe);
         ArgumentNullException.ThrowIfNull(fluid);
-        EnsurePositiveFinite(dynamicViscosityPascalSeconds, nameof(dynamicViscosityPascalSeconds));
+        HydraulicValidation.EnsurePositiveFinite(dynamicViscosityPascalSeconds, nameof(dynamicViscosityPascalSeconds));
 
         var velocityMetersPerSecond = CalculateVelocityMetersPerSecond(pipe, volumetricFlowRateCubicMetersPerSecond);
         var speedMetersPerSecond = Math.Abs(velocityMetersPerSecond);
@@ -103,27 +104,5 @@ public static class PipeFlowCalculator
         return frictionFactor
             * (pipe.LengthMeters / pipe.InnerDiameterMeters)
             * (fluid.DensityKilogramsPerCubicMeter * speedMetersPerSecond * speedMetersPerSecond / 2);
-    }
-
-    private static double EnsureFinite(double value, string parameterName)
-    {
-        if (double.IsNaN(value) || double.IsInfinity(value))
-        {
-            throw new ArgumentOutOfRangeException(parameterName, value, "Value must be finite.");
-        }
-
-        return value;
-    }
-
-    private static double EnsurePositiveFinite(double value, string parameterName)
-    {
-        EnsureFinite(value, parameterName);
-
-        if (value <= 0)
-        {
-            throw new ArgumentOutOfRangeException(parameterName, value, "Value must be greater than zero.");
-        }
-
-        return value;
     }
 }

@@ -1,4 +1,5 @@
 using FDS.Core.Models;
+using FDS.Hydraulics.Internal;
 
 namespace FDS.Hydraulics.Models;
 
@@ -16,12 +17,12 @@ public sealed class Pipe
         string? toNodeId = null,
         double roughnessMeters = 0)
     {
-        Id = RequiredId(id, nameof(id));
-        FromNodeId = OptionalId(fromNodeId, nameof(fromNodeId));
-        ToNodeId = OptionalId(toNodeId, nameof(toNodeId));
-        LengthMeters = EnsureNonNegativeFinite(lengthMeters, nameof(lengthMeters));
-        InnerDiameterMeters = EnsurePositiveFinite(innerDiameterMeters, nameof(innerDiameterMeters));
-        RoughnessMeters = EnsureNonNegativeFinite(roughnessMeters, nameof(roughnessMeters));
+        Id = HydraulicValidation.RequiredId(id, nameof(id));
+        FromNodeId = HydraulicValidation.OptionalId(fromNodeId, nameof(fromNodeId));
+        ToNodeId = HydraulicValidation.OptionalId(toNodeId, nameof(toNodeId));
+        LengthMeters = HydraulicValidation.EnsureNonNegativeFinite(lengthMeters, nameof(lengthMeters));
+        InnerDiameterMeters = HydraulicValidation.EnsurePositiveFinite(innerDiameterMeters, nameof(innerDiameterMeters));
+        RoughnessMeters = HydraulicValidation.EnsureNonNegativeFinite(roughnessMeters, nameof(roughnessMeters));
     }
 
     public string Id { get; }
@@ -57,64 +58,5 @@ public sealed class Pipe
             edge.FromNodeId,
             edge.ToNodeId,
             roughnessMeters);
-    }
-
-    private static string RequiredId(string value, string parameterName)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            throw new ArgumentException("Identifier cannot be empty.", parameterName);
-        }
-
-        return value.Trim();
-    }
-
-    private static string? OptionalId(string? value, string parameterName)
-    {
-        if (value is null)
-        {
-            return null;
-        }
-
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            throw new ArgumentException("Identifier cannot be empty when provided.", parameterName);
-        }
-
-        return value.Trim();
-    }
-
-    private static double EnsureFinite(double value, string parameterName)
-    {
-        if (double.IsNaN(value) || double.IsInfinity(value))
-        {
-            throw new ArgumentOutOfRangeException(parameterName, value, "Value must be finite.");
-        }
-
-        return value;
-    }
-
-    private static double EnsureNonNegativeFinite(double value, string parameterName)
-    {
-        EnsureFinite(value, parameterName);
-
-        if (value < 0)
-        {
-            throw new ArgumentOutOfRangeException(parameterName, value, "Value cannot be negative.");
-        }
-
-        return value;
-    }
-
-    private static double EnsurePositiveFinite(double value, string parameterName)
-    {
-        EnsureFinite(value, parameterName);
-
-        if (value <= 0)
-        {
-            throw new ArgumentOutOfRangeException(parameterName, value, "Value must be greater than zero.");
-        }
-
-        return value;
     }
 }

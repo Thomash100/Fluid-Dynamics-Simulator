@@ -26,6 +26,8 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 - `FDS.Hydraulics` ist als .NET 8 Klassenbibliothek angelegt.
 - `FDS.Hydraulics.Tests` ist als xUnit-Testprojekt angelegt.
 - Ein Rohrmodell und Einzelrohr-Berechnungen für Geschwindigkeit, Reynoldszahl, Reibungszahl und Darcy-Weisbach-Druckverlust sind implementiert.
+- Armaturen-/Einzelwiderstandsmodelle für `LocalResistance`, `Fitting` und `Valve` sind implementiert.
+- Zeta-basierter Druckverlust und ein Kv/Kvs-Grundmodell sind vorbereitet.
 
 ## Milestones
 
@@ -64,6 +66,10 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 | `PipeFlowCalculator.CalculateReynoldsNumber` | Implementiert mit Dichte, Geschwindigkeit, Durchmesser und dynamischer Viskosität. |
 | `PipeFlowCalculator.EstimateDarcyFrictionFactor` | Implementiert mit `64/Re` für laminar und Blasius-Näherung für nicht-laminar. |
 | `PipeFlowCalculator.CalculateDarcyWeisbachPressureLossPascals` | Als Einzelrohr-Druckverlust vorbereitet. Kein Netzwerksolver. |
+| `LocalResistance` | Implementiert mit dimensionslosem Zeta-Wert. |
+| `Fitting` | Implementiert als Armaturen-/Formstückmodell mit Fitting-Art und Zeta-Widerstand. |
+| `Valve` | Implementiert als Ventil-Grundmodell mit optionalem Zeta- und Kv/Kvs-Datensatz. |
+| `LocalResistanceCalculator` | Implementiert für Zeta-Druckverlust und Kv-basierten Ventil-Druckverlust. |
 
 ## Einheiten
 
@@ -76,6 +82,8 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 - Dynamische Viskosität: Pa·s
 - Strömungsgeschwindigkeit: m/s
 - Reynoldszahl und Reibungszahl: dimensionslos
+- Zeta-Wert: dimensionslos
+- Kv/Kvs: m³/h
 
 ## Validierung
 
@@ -88,6 +96,9 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 - Keine Temperaturen unter absolutem Nullpunkt
 - Keine negative Rohrrauheit
 - Keine dynamische Viskosität kleiner oder gleich 0
+- Keine negativen Zeta-Werte
+- Kein Kv oder Kvs kleiner oder gleich 0
+- Kein Kv größer als Kvs
 
 ## Dokumentation
 
@@ -104,4 +115,4 @@ Ein GitHub Project Board konnte noch nicht angelegt werden. Die klassische Proje
 
 ## Empfohlener nächster Entwicklungsschritt
 
-Als nächster technischer Schritt sollte `FDS.Hydraulics` um einfache Beispielrohre und dokumentierte Referenzfälle ergänzt werden. Danach kann die eigentliche Netzsolver-Architektur separat geplant werden.
+Als nächster technischer Schritt sollte `FDS.Hydraulics` um ein Pumpen-Grundmodell ergänzt werden. Danach ist die fachliche Reihenfolge für einfache Stränge und anschließend den Netzsolver vorbereitet.
