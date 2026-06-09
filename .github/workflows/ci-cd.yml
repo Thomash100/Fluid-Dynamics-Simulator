@@ -18,10 +18,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
       - name: Validate version file
         run: |
           test -f version.json
           cat version.json
+
+      - name: Restore
+        run: dotnet restore FluidDynamicsSimulator.sln
+
+      - name: Build
+        run: dotnet build FluidDynamicsSimulator.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test FluidDynamicsSimulator.sln --configuration Release --no-build --verbosity normal
 
       - name: Create artifact
         run: |
