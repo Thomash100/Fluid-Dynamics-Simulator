@@ -2,7 +2,7 @@
 
 Stand: 2026-06-11
 
-`FDS.Hydraulics` enthält erste hydraulische Einzelrohr-, Einzelwiderstands-, Pumpen- und Strang-Bausteine. Das Modul berechnet lokale Kennwerte für ein Rohr, Armaturen, Ventile, eine einzelne Pumpe und einen einfachen Strang bei vorgegebenem Volumenstrom, löst aber kein Netzwerk.
+`FDS.Hydraulics` enthält erste hydraulische Einzelrohr-, Einzelwiderstands-, Pumpen-, Strang- und Netzwerkauswertungs-Bausteine. Das Modul berechnet lokale Kennwerte für ein Rohr, Armaturen, Ventile, eine einzelne Pumpe, einen einfachen Strang und mehrere bekannte Stränge bei vorgegebenen Volumenströmen, löst aber kein Netzwerk.
 
 ## Enthalten
 
@@ -22,6 +22,11 @@ Stand: 2026-06-11
 | `HydraulicBranch` | Einfacher hydraulischer Strang aus Rohren, lokalen Widerständen, Armaturen, Ventilen und optionaler Pumpe. |
 | `HydraulicBranchResult` | Ergebnisobjekt für Druckverlust, Pumpendruckerhöhung und Netto-Druckbilanz. |
 | `HydraulicBranchCalculator` | Aggregiert Strangkomponenten bei einem vorgegebenen Volumenstrom. |
+| `HydraulicBranchFlow` | Ordnet einem Strang einen bekannten nichtnegativen Volumenstrom zu. |
+| `HydraulicNetwork` | Feste Netzwerkauswertung aus mehreren Strängen mit bekannten Volumenströmen. |
+| `HydraulicNetworkBranchResult` | Netzwerkbezogenes Ergebnis für einen einzelnen Strang. |
+| `HydraulicNetworkResult` | Gesamtergebnis mit BranchResults, kritischem Strang und erforderlicher Pumpendruckerhöhung. |
+| `HydraulicNetworkCalculator` | Wertet mehrere Stränge aus und bestimmt die loss-basierte Mindest-Pumpendruckerhöhung. |
 
 ## Berechnungen
 
@@ -39,6 +44,7 @@ Stand: 2026-06-11
 | Pumpen-Wellenleistung | W | `CalculateShaftPowerWatts` |
 | Pumpen-Druckerhöhung | Pa | `CalculatePressureIncreasePascals` |
 | Strang-Druckbilanz | Pa | `HydraulicBranchCalculator.Calculate` |
+| Netzwerkauswertung | Pa und m | `HydraulicNetworkCalculator.Calculate` |
 
 ## Einheiten
 
@@ -58,6 +64,8 @@ Stand: 2026-06-11
 | Pumpenleistung | W |
 | Wirkungsgrad | dimensionslos, 0 < eta <= 1 |
 | Netto-Druckbilanz | Pa |
+| Erforderliche Pumpendruckerhöhung | Pa |
+| Erforderliche Förderhöhe | m |
 
 ## Reibungszahl-Modell
 
@@ -136,11 +144,33 @@ Zeta-basierte Einzelwiderstände benötigen eine Bezugsgeschwindigkeit. In diese
 
 Ventile mit `ValveFlowCoefficient` werden in der Strangberechnung über Kv berechnet. Ist kein Kv/Kvs-Datensatz vorhanden, wird der optionale Zeta-Widerstand verwendet.
 
+## Feste Netzwerkauswertung
+
+`HydraulicNetwork` fasst mehrere `HydraulicBranchFlow`-Einträge zusammen. Jeder Eintrag enthält einen bereits definierten `HydraulicBranch` und einen bekannten nichtnegativen Volumenstrom in m³/s. Der Volumenstrom wird nicht berechnet oder verteilt.
+
+`HydraulicNetworkCalculator.Calculate` verwendet intern für jeden Strang `HydraulicBranchCalculator.Calculate`. Das Netzwerkergebnis enthält:
+
+- alle `HydraulicNetworkBranchResult`-Einträge
+- die Druckbilanz jedes Strangs über das enthaltene `HydraulicBranchResult`
+- den ungünstigsten Strang als `CriticalBranchResult`
+- die erforderliche Mindest-Pumpendruckerhöhung in Pa
+- optional die erforderliche Förderhöhe in m, wenn die Fluiddichte größer als 0 ist
+
+Die erforderliche Mindest-Pumpendruckerhöhung wird aktuell loss-basiert bestimmt:
+
+```text
+dp_required = max(dp_pipe + dp_local)
+```
+
+Vorhandene optionale Pumpen in Strängen bleiben in der jeweiligen Netto-Druckbilanz sichtbar. Sie reduzieren die loss-basierte Mindest-Pumpendruckerhöhung für die vorbereitende Pumpenauswertung nicht.
+
 ## Grenzen
 
 - Kein kompletter hydraulischer Netzwerksolver
+- Kein automatischer Volumenstromabgleich
 - Keine automatische Pumpen-Betriebspunktberechnung
 - Keine iterative Stranglösung
+- Keine Pumpenkennlinienauswahl
 - Keine Pumpenregelstrategie
 - Keine Regelventil-Auslegung
 - Keine Regelungstechnik

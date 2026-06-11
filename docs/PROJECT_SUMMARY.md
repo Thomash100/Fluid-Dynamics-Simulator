@@ -30,6 +30,7 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 - Zeta-basierter Druckverlust und ein Kv/Kvs-Grundmodell sind vorbereitet.
 - Ein Pumpen-Grundmodell mit Kennlinie, Förderhöheninterpolation, hydraulischer Leistung und optionaler Wirkungsgradkennlinie ist implementiert.
 - Eine einfache hydraulische Strangberechnung aggregiert Rohrverluste, Einzelwiderstände und Pumpen-Druckerhöhung bei vorgegebenem Volumenstrom.
+- Eine feste hydraulische Netzwerkauswertung für mehrere Stränge mit bekannten Volumenströmen ermittelt BranchResults, den ungünstigsten Strang und die erforderliche Mindest-Pumpendruckerhöhung.
 
 ## Milestones
 
@@ -79,6 +80,11 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 | `HydraulicBranch` | Implementiert als einfacher Strang aus Rohren, lokalen Widerständen, Armaturen, Ventilen und optionaler Pumpe. |
 | `HydraulicBranchResult` | Implementiert als Ergebnisobjekt für Volumenstrom, Verlustsummen, Pumpendruckerhöhung und Netto-Druckbilanz. |
 | `HydraulicBranchCalculator` | Implementiert für Strangberechnung bei fest vorgegebenem Volumenstrom. Kein Betriebspunktsolver. |
+| `HydraulicBranchFlow` | Implementiert als Zuordnung von Strang zu bekanntem Volumenstrom. |
+| `HydraulicNetwork` | Implementiert als feste Netzwerkauswertung aus mehreren Strängen mit bekannten Volumenströmen. |
+| `HydraulicNetworkBranchResult` | Implementiert als Netzwerk-Ergebnis für einen einzelnen Strang. |
+| `HydraulicNetworkResult` | Implementiert mit allen BranchResults, kritischem Strang, erforderlicher Pumpendruckerhöhung und optionaler Förderhöhe. |
+| `HydraulicNetworkCalculator` | Implementiert für Netzwerkauswertung ohne Volumenstromabgleich, Solver oder Iteration. |
 
 ## Einheiten
 
@@ -97,6 +103,8 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 - Pumpenleistung: W
 - Pumpenwirkungsgrad: dimensionslos, 0 < eta <= 1
 - Strang-Druckbilanz: Pa
+- Erforderliche Pumpendruckerhöhung: Pa
+- Erforderliche Förderhöhe: m
 
 ## Validierung
 
@@ -120,6 +128,9 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 - Kein Pumpenwirkungsgrad kleiner oder gleich 0 oder größer als 1
 - Kein hydraulischer Strang ohne Rohr
 - Kein negativer Volumenstrom in der einfachen Strangberechnung
+- Kein hydraulisches Netzwerk ohne Strang
+- Keine doppelten Strang-IDs innerhalb eines hydraulischen Netzwerks
+- Kein negativer vorgegebener Netzwerk-Volumenstrom
 
 ## Dokumentation
 
@@ -136,4 +147,4 @@ Ein GitHub Project Board konnte noch nicht angelegt werden. Die klassische Proje
 
 ## Empfohlener nächster Entwicklungsschritt
 
-Als nächster technischer Schritt sollte `FDS.Hydraulics` eine einfache Betriebspunktberechnung für einen einzelnen Strang erhalten. Danach ist die fachliche Reihenfolge für mehrere Stränge und anschließend den hydraulischen Netzsolver vorbereitet.
+Als nächster technischer Schritt sollte `FDS.Hydraulics` eine einfache Betriebspunktberechnung für einen einzelnen Strang erhalten. Danach ist die fachliche Reihenfolge für Pumpenauswahl, mehrere gekoppelte Stränge und anschließend den hydraulischen Netzsolver vorbereitet.

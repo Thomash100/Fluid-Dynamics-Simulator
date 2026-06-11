@@ -16,7 +16,7 @@ Fluid Dynamics Simulator (FDS) ist eine Simulationsplattform für technische Geb
 
 Die erste Grundstruktur für `FDS.Core` ist vorhanden. Sie enthält Basismodelle für Netzwerke, Knoten, Kanten und Fluide sowie Unit Tests für die grundlegenden Validierungen.
 
-`FDS.Hydraulics` ist als nächstes Modul angelegt. Es enthält ein Rohrmodell, Einzelrohr-Berechnungen für Strömungsgeschwindigkeit, Reynoldszahl, einfache Reibungszahl-Abschätzung und vorbereiteten Darcy-Weisbach-Druckverlust. Zusätzlich sind Armaturen-/Einzelwiderstandsmodelle mit Zeta-Druckverlust sowie ein Kv/Kvs-Grundmodell für Ventile vorbereitet. Ein Pumpen-Grundmodell mit Kennlinien-Stützpunkten, linearer Förderhöheninterpolation, hydraulischer Leistung und optionaler Wirkungsgradkennlinie ist ebenfalls enthalten. Eine einfache Strangberechnung aggregiert diese Bausteine bei vorgegebenem Volumenstrom. Es ist noch kein kompletter Netzwerksolver implementiert.
+`FDS.Hydraulics` ist als nächstes Modul angelegt. Es enthält ein Rohrmodell, Einzelrohr-Berechnungen für Strömungsgeschwindigkeit, Reynoldszahl, einfache Reibungszahl-Abschätzung und vorbereiteten Darcy-Weisbach-Druckverlust. Zusätzlich sind Armaturen-/Einzelwiderstandsmodelle mit Zeta-Druckverlust sowie ein Kv/Kvs-Grundmodell für Ventile vorbereitet. Ein Pumpen-Grundmodell mit Kennlinien-Stützpunkten, linearer Förderhöheninterpolation, hydraulischer Leistung und optionaler Wirkungsgradkennlinie ist ebenfalls enthalten. Eine einfache Strangberechnung aggregiert diese Bausteine bei vorgegebenem Volumenstrom. Eine feste Netzwerkauswertung fasst mehrere Stränge mit bekannten Volumenströmen zusammen und ermittelt den ungünstigsten Strang sowie die erforderliche Mindest-Pumpendruckerhöhung. Es ist noch kein kompletter Netzwerksolver implementiert.
 
 ## Projektstruktur
 
@@ -32,13 +32,18 @@ src/
   FDS.Hydraulics/
     Calculations/
       HydraulicBranchCalculator.cs
+      HydraulicNetworkCalculator.cs
       LocalResistanceCalculator.cs
       PipeFlowCalculator.cs
       PumpCalculator.cs
     Models/
       Fitting.cs
       HydraulicBranch.cs
+      HydraulicBranchFlow.cs
       HydraulicBranchResult.cs
+      HydraulicNetwork.cs
+      HydraulicNetworkBranchResult.cs
+      HydraulicNetworkResult.cs
       LocalResistance.cs
       Pipe.cs
       Pump.cs
@@ -80,6 +85,8 @@ tests/
 - `PumpCalculator`: Einzelpumpen-Hilfsrechnungen für Förderhöhe, hydraulische Leistung und optionale Wellenleistung.
 - `HydraulicBranch`: einfacher hydraulischer Strang aus Rohren, Einzelwiderständen, Armaturen, Ventilen und optionaler Pumpe.
 - `HydraulicBranchCalculator`: Druckbilanz bei vorgegebenem Volumenstrom ohne Iteration und ohne Netzwerksolver.
+- `HydraulicNetwork`: feste Netzwerkauswertung aus mehreren Strängen mit bekannten Volumenströmen.
+- `HydraulicNetworkCalculator`: wertet alle Stränge aus, bestimmt den ungünstigsten Strang und die erforderliche Mindest-Pumpendruckerhöhung.
 
 ## Einheiten
 
@@ -102,6 +109,8 @@ tests/
 | Pumpenleistung | W | Ergebnis `CalculateHydraulicPowerWatts` |
 | Wirkungsgrad | dimensionslos | `PumpEfficiencyPoint.Efficiency` |
 | Netto-Druckbilanz | Pa | `HydraulicBranchResult.NetPressureBalancePascals` |
+| Erforderliche Pumpendruckerhöhung | Pa | `HydraulicNetworkResult.RequiredPumpPressureIncreasePascals` |
+| Erforderliche Förderhöhe | m | `HydraulicNetworkResult.RequiredPumpHeadMeters` |
 
 ## Validierungen
 
@@ -126,12 +135,17 @@ tests/
 - Wirkungsgrade müssen größer als 0 und kleiner oder gleich 1 sein.
 - Hydraulische Stränge benötigen mindestens ein Rohr.
 - Strangberechnungen akzeptieren aktuell nur nichtnegative Volumenströme in m³/s.
+- Hydraulische Netzwerke benötigen mindestens einen Strang.
+- Strang-IDs müssen innerhalb eines hydraulischen Netzwerks eindeutig sein.
+- Vorgegebene Netzwerk-Volumenströme dürfen nicht negativ sein.
 
 ## Nicht enthalten
 
 - Kein kompletter hydraulischer Netzwerksolver
+- Kein automatischer Volumenstromabgleich
 - Keine automatische Pumpen-Betriebspunktberechnung
 - Keine iterative Stranglösung
+- Keine Pumpenkennlinienauswahl
 - Keine Pumpenregelstrategie
 - Keine vollständige Regelventil-Auslegung
 - Keine UI

@@ -42,13 +42,22 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 - Ergebnisobjekt `HydraulicBranchResult`
 - Strangberechnung `HydraulicBranchCalculator`
 - Aggregation von Rohrdruckverlusten, Einzelwiderständen und Pumpen-Druckerhöhung bei vorgegebenem Volumenstrom
-- Unit Tests für Rohrmodell, Einzelwiderstände, Ventile, Pumpen und Strangberechnung
+- Modell `HydraulicBranchFlow`
+- Modell `HydraulicNetwork`
+- Ergebnisobjekte `HydraulicNetworkBranchResult` und `HydraulicNetworkResult`
+- Netzwerkauswertung `HydraulicNetworkCalculator`
+- Ermittlung des ungünstigsten Strangs
+- Erforderliche Mindest-Pumpendruckerhöhung in Pa
+- Optionale erforderliche Förderhöhe in m bei positiver Fluiddichte
+- Unit Tests für Rohrmodell, Einzelwiderstände, Ventile, Pumpen, Strangberechnung und Netzwerkauswertung
 
 ## Nicht umgesetzt
 
 - Kein kompletter Netzwerksolver
+- Kein automatischer Volumenstromabgleich
 - Keine automatische Pumpen-Betriebspunktberechnung
 - Keine iterative Stranglösung
+- Keine Pumpenkennlinienauswahl
 - Keine Pumpenregelstrategie
 - Keine Regelventil-Auslegung
 - Keine UI
@@ -59,4 +68,4 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 dotnet test FluidDynamicsSimulator.sln
 ```
 
-Ergebnis: 88 Tests bestanden.
+Ergebnis: 99 Tests bestanden.
