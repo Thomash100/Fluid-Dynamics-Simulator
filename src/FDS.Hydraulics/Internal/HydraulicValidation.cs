@@ -70,4 +70,16 @@ internal static class HydraulicValidation
 
         return value;
     }
+
+    public static double EnsurePositiveFraction(double value, string parameterName)
+    {
+        EnsurePositiveFinite(value, parameterName);
+
+        if (value > 1)
+        {
+            throw new ArgumentOutOfRangeException(parameterName, value, "Value cannot be greater than one.");
+        }
+
+        return value;
+    }
 }

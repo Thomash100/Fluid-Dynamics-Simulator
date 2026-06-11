@@ -1,8 +1,8 @@
 # FDS.Hydraulics Modellgrundlage
 
-Stand: 2026-06-09
+Stand: 2026-06-10
 
-`FDS.Hydraulics` enthält erste hydraulische Einzelrohr- und Einzelwiderstands-Bausteine. Das Modul berechnet lokale Kennwerte für ein Rohr, Armaturen und Ventile, löst aber kein Netzwerk.
+`FDS.Hydraulics` enthält erste hydraulische Einzelrohr-, Einzelwiderstands- und Pumpen-Bausteine. Das Modul berechnet lokale Kennwerte für ein Rohr, Armaturen, Ventile und eine einzelne Pumpe, löst aber kein Netzwerk.
 
 ## Enthalten
 
@@ -15,6 +15,10 @@ Stand: 2026-06-09
 | `Valve` | Ventil-Grundmodell mit optionalem Zeta-Widerstand und optionalem Kv/Kvs-Datensatz. |
 | `ValveFlowCoefficient` | Kv/Kvs-Werte in m³/h. |
 | `LocalResistanceCalculator` | Zeta- und Kv-basierte Einzelkomponenten-Hilfsrechnungen. |
+| `Pump` | Pumpen-Grundmodell mit Förderhöhenkennlinie und optionaler Wirkungsgradkennlinie. |
+| `PumpCurve` | Förderhöhenkennlinie aus Volumenstrom/Förderhöhe-Stützpunkten. |
+| `PumpEfficiencyCurve` | Optionale Wirkungsgradkennlinie aus Volumenstrom/Wirkungsgrad-Stützpunkten. |
+| `PumpCalculator` | Einzelpumpen-Hilfsrechnungen für Kennlinie und Leistung. |
 
 ## Berechnungen
 
@@ -27,6 +31,9 @@ Stand: 2026-06-09
 | Darcy-Weisbach-Druckverlust | Pa | `CalculateDarcyWeisbachPressureLossPascals` |
 | Zeta-Druckverlust | Pa | `CalculateZetaPressureLossPascals` |
 | Kv-basierter Ventil-Druckverlust | Pa | `CalculateValvePressureLossFromKvPascals` |
+| Interpolierte Pumpen-Förderhöhe | m | `InterpolateHeadMeters` |
+| Hydraulische Pumpenleistung | W | `CalculateHydraulicPowerWatts` |
+| Pumpen-Wellenleistung | W | `CalculateShaftPowerWatts` |
 
 ## Einheiten
 
@@ -42,6 +49,9 @@ Stand: 2026-06-09
 | Druckverlust | Pa |
 | Zeta-Wert | dimensionslos |
 | Kv/Kvs | m³/h |
+| Pumpen-Förderhöhe | m |
+| Pumpenleistung | W |
+| Wirkungsgrad | dimensionslos, 0 < eta <= 1 |
 
 ## Reibungszahl-Modell
 
@@ -70,10 +80,31 @@ dp_bar = (rho / 1000) * (Q_m3h / Kv)²
 
 Das ist keine Regelventil-Auslegung und keine Ventilautoritätsberechnung. Es ist nur ein Basismodell für spätere Ventilbausteine.
 
+## Pumpenmodell
+
+`PumpCurve` speichert Stützpunkte aus Volumenstrom `Q` in m³/s und Förderhöhe `H` in m. Die Förderhöhe wird innerhalb des Kennlinienbereichs linear interpoliert. Werte außerhalb des Stützpunktbereichs werden bewusst abgelehnt, damit keine stillschweigende Extrapolation entsteht.
+
+Die hydraulische Leistung wird für einen vorgegebenen Volumenstrom berechnet:
+
+```text
+P_h = rho * g * Q * H
+```
+
+Dabei ist `rho` die Dichte in kg/m³, `g` die Erdbeschleunigung in m/s², `Q` der Volumenstrom in m³/s und `H` die interpolierte Förderhöhe in m.
+
+Optional kann `PumpEfficiencyCurve` eine Wirkungsgradkennlinie hinterlegen. Daraus wird die Wellenleistung berechnet:
+
+```text
+P_shaft = P_h / eta
+```
+
+Das Pumpenmodell berechnet keinen automatischen Betriebspunkt und koppelt die Pumpe noch nicht mit Rohr-, Armaturen- oder Netzwerkwiderständen.
+
 ## Grenzen
 
 - Kein kompletter hydraulischer Netzwerksolver
-- Keine Pumpenkennlinie
+- Keine automatische Pumpen-Betriebspunktberechnung
+- Keine Pumpenregelstrategie
 - Keine Regelventil-Auslegung
 - Keine Regelungstechnik
 - Keine UI

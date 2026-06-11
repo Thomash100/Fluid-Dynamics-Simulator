@@ -1,6 +1,6 @@
 # Abschlusszusammenfassung FDS.Core Grundstruktur
 
-Stand: 2026-06-09
+Stand: 2026-06-10
 
 ## Ergebnis
 
@@ -24,7 +24,7 @@ Die Grundstruktur für `FDS.Core` ist implementiert. Die Solution `FluidDynamics
 
 - Keine Druckverlustberechnung
 - Kein hydraulischer Solver
-- Keine Pumpenkennlinie
+- Keine Pumpenkennlinie im Core-Modul
 - Keine UI
 - Keine IFC- oder Revit-Schnittstelle
 

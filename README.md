@@ -16,7 +16,7 @@ Fluid Dynamics Simulator (FDS) ist eine Simulationsplattform für technische Geb
 
 Die erste Grundstruktur für `FDS.Core` ist vorhanden. Sie enthält Basismodelle für Netzwerke, Knoten, Kanten und Fluide sowie Unit Tests für die grundlegenden Validierungen.
 
-`FDS.Hydraulics` ist als nächstes Modul angelegt. Es enthält ein Rohrmodell, Einzelrohr-Berechnungen für Strömungsgeschwindigkeit, Reynoldszahl, einfache Reibungszahl-Abschätzung und vorbereiteten Darcy-Weisbach-Druckverlust. Zusätzlich sind Armaturen-/Einzelwiderstandsmodelle mit Zeta-Druckverlust sowie ein Kv/Kvs-Grundmodell für Ventile vorbereitet. Es ist noch kein kompletter Netzwerksolver implementiert.
+`FDS.Hydraulics` ist als nächstes Modul angelegt. Es enthält ein Rohrmodell, Einzelrohr-Berechnungen für Strömungsgeschwindigkeit, Reynoldszahl, einfache Reibungszahl-Abschätzung und vorbereiteten Darcy-Weisbach-Druckverlust. Zusätzlich sind Armaturen-/Einzelwiderstandsmodelle mit Zeta-Druckverlust sowie ein Kv/Kvs-Grundmodell für Ventile vorbereitet. Ein Pumpen-Grundmodell mit Kennlinien-Stützpunkten, linearer Förderhöheninterpolation, hydraulischer Leistung und optionaler Wirkungsgradkennlinie ist ebenfalls enthalten. Es ist noch kein kompletter Netzwerksolver implementiert.
 
 ## Projektstruktur
 
@@ -33,10 +33,16 @@ src/
     Calculations/
       LocalResistanceCalculator.cs
       PipeFlowCalculator.cs
+      PumpCalculator.cs
     Models/
       Fitting.cs
       LocalResistance.cs
       Pipe.cs
+      Pump.cs
+      PumpCurve.cs
+      PumpCurvePoint.cs
+      PumpEfficiencyCurve.cs
+      PumpEfficiencyPoint.cs
       Valve.cs
       ValveFlowCoefficient.cs
 
@@ -66,6 +72,9 @@ tests/
 - `Valve`: Ventil-Grundmodell mit optionalem Zeta-Wert und optionalem Kv/Kvs-Datensatz.
 - Zeta-basierter Druckverlust als Einzelkomponentenrechnung.
 - Kv/Kvs-basierter Ventil-Druckverlust nach metrischer Kv-Konvention.
+- `Pump`: Pumpen-Grundmodell mit Förderhöhenkennlinie und optionaler Wirkungsgradkennlinie.
+- `PumpCurve`: Kennlinie aus Volumenstrom/Förderhöhe-Stützpunkten mit linearer Interpolation.
+- `PumpCalculator`: Einzelpumpen-Hilfsrechnungen für Förderhöhe, hydraulische Leistung und optionale Wellenleistung.
 
 ## Einheiten
 
@@ -84,6 +93,9 @@ tests/
 | Druckverlust | Pa | Ergebnis `CalculateDarcyWeisbachPressureLossPascals` |
 | Zeta-Wert | dimensionslos | `LocalResistance.Zeta` |
 | Kv/Kvs | m³/h | `ValveFlowCoefficient` |
+| Pumpen-Förderhöhe | m | `PumpCurvePoint.HeadMeters` |
+| Pumpenleistung | W | Ergebnis `CalculateHydraulicPowerWatts` |
+| Wirkungsgrad | dimensionslos | `PumpEfficiencyPoint.Efficiency` |
 
 ## Validierungen
 
@@ -101,12 +113,18 @@ tests/
 - Zeta-Werte dürfen nicht negativ sein.
 - Kv und Kvs müssen größer als 0 sein.
 - Kv darf nicht größer als Kvs sein.
+- Pumpen-IDs und -Namen dürfen nicht leer sein.
+- Pumpenkennlinien benötigen mindestens zwei Stützpunkte.
+- Volumenstrom- und Förderhöhen-Stützpunkte dürfen nicht negativ sein.
+- Förderhöhe darf mit steigendem Volumenstrom nicht steigen.
+- Wirkungsgrade müssen größer als 0 und kleiner oder gleich 1 sein.
 
 ## Nicht enthalten
 
 - Kein kompletter hydraulischer Netzwerksolver
-- Keine Pumpenkennlinie
-- Keine Ventilberechnung
+- Keine automatische Pumpen-Betriebspunktberechnung
+- Keine Pumpenregelstrategie
+- Keine vollständige Regelventil-Auslegung
 - Keine UI
 - Keine IFC- oder Revit-Schnittstelle
 

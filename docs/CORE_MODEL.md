@@ -1,8 +1,8 @@
 # FDS.Core Modellgrundlage
 
-Stand: 2026-06-09
+Stand: 2026-06-10
 
-`FDS.Core` enthält die ersten fachlichen Basismodelle für eine spätere hydraulische, thermische und BIM-basierte Simulation. Die Modelle bilden nur Datenstruktur und Validierung ab. Druckverlustberechnung, hydraulische Solver, Pumpenkennlinien, UI sowie IFC- und Revit-Schnittstellen sind bewusst nicht enthalten.
+`FDS.Core` enthält die ersten fachlichen Basismodelle für eine spätere hydraulische, thermische und BIM-basierte Simulation. Die Modelle bilden nur Datenstruktur und Validierung ab. Druckverlustberechnung, hydraulische Solver, Pumpenmodelle, UI sowie IFC- und Revit-Schnittstellen sind bewusst nicht im Core-Modul enthalten.
 
 ## Modelle
 

@@ -1,6 +1,6 @@
-# Abschlusszusammenfassung FDS.Hydraulics Grundstruktur
+# Abschlusszusammenfassung FDS.Hydraulics Bausteine
 
-Stand: 2026-06-09
+Stand: 2026-06-10
 
 ## Ergebnis
 
@@ -29,12 +29,21 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 - Modell `ValveFlowCoefficient`
 - Zeta-Wert-basierter Druckverlust
 - Kv/Kvs-Grundmodell für Ventile
-- Unit Tests für Rohrmodell und hydraulische Berechnungen
+- Pumpenmodell `Pump`
+- Pumpenkennlinie `PumpCurve`
+- Kennlinien-Stützpunkte `PumpCurvePoint`
+- Optionale Wirkungsgradkennlinie `PumpEfficiencyCurve`
+- Wirkungsgrad-Stützpunkte `PumpEfficiencyPoint`
+- Lineare Förderhöheninterpolation bei gegebenem Volumenstrom
+- Hydraulische Pumpenleistung
+- Optionale Wellenleistung aus Wirkungsgradkennlinie
+- Unit Tests für Rohrmodell, Einzelwiderstände, Ventile und Pumpen
 
 ## Nicht umgesetzt
 
 - Kein kompletter Netzwerksolver
-- Keine Pumpenkennlinie
+- Keine automatische Pumpen-Betriebspunktberechnung
+- Keine Pumpenregelstrategie
 - Keine Regelventil-Auslegung
 - Keine UI
 
@@ -44,4 +53,4 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 dotnet test FluidDynamicsSimulator.sln
 ```
 
-Ergebnis: 54 Tests bestanden.
+Ergebnis: 77 Tests bestanden.

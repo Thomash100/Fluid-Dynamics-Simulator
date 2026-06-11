@@ -1,6 +1,6 @@
 # Projektzusammenfassung
 
-Stand: 2026-06-09
+Stand: 2026-06-10
 
 Repository: https://github.com/Thomash100/Fluid-Dynamics-Simulator
 
@@ -28,6 +28,7 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 - Ein Rohrmodell und Einzelrohr-Berechnungen für Geschwindigkeit, Reynoldszahl, Reibungszahl und Darcy-Weisbach-Druckverlust sind implementiert.
 - Armaturen-/Einzelwiderstandsmodelle für `LocalResistance`, `Fitting` und `Valve` sind implementiert.
 - Zeta-basierter Druckverlust und ein Kv/Kvs-Grundmodell sind vorbereitet.
+- Ein Pumpen-Grundmodell mit Kennlinie, Förderhöheninterpolation, hydraulischer Leistung und optionaler Wirkungsgradkennlinie ist implementiert.
 
 ## Milestones
 
@@ -70,6 +71,10 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 | `Fitting` | Implementiert als Armaturen-/Formstückmodell mit Fitting-Art und Zeta-Widerstand. |
 | `Valve` | Implementiert als Ventil-Grundmodell mit optionalem Zeta- und Kv/Kvs-Datensatz. |
 | `LocalResistanceCalculator` | Implementiert für Zeta-Druckverlust und Kv-basierten Ventil-Druckverlust. |
+| `Pump` | Implementiert als Pumpen-Grundmodell mit Förderhöhenkennlinie und optionaler Wirkungsgradkennlinie. |
+| `PumpCurve` | Implementiert mit sortierten, eindeutigen Volumenstrom/Förderhöhe-Stützpunkten und linearer Interpolation. |
+| `PumpEfficiencyCurve` | Implementiert als optionales Wirkungsgrad-Grundmodell mit linearer Interpolation. |
+| `PumpCalculator` | Implementiert für Förderhöhenabfrage, hydraulische Leistung und optionale Wellenleistung. |
 
 ## Einheiten
 
@@ -84,6 +89,9 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 - Reynoldszahl und Reibungszahl: dimensionslos
 - Zeta-Wert: dimensionslos
 - Kv/Kvs: m³/h
+- Pumpen-Förderhöhe: m
+- Pumpenleistung: W
+- Pumpenwirkungsgrad: dimensionslos, 0 < eta <= 1
 
 ## Validierung
 
@@ -99,6 +107,12 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 - Keine negativen Zeta-Werte
 - Kein Kv oder Kvs kleiner oder gleich 0
 - Kein Kv größer als Kvs
+- Keine leeren Pumpen-IDs oder Pumpennamen
+- Keine Pumpenkennlinien mit weniger als zwei Stützpunkten
+- Keine doppelten Volumenstromwerte in Pumpenkennlinien
+- Keine negative Förderhöhe
+- Keine mit steigendem Volumenstrom steigende Förderhöhe
+- Kein Pumpenwirkungsgrad kleiner oder gleich 0 oder größer als 1
 
 ## Dokumentation
 
@@ -115,4 +129,4 @@ Ein GitHub Project Board konnte noch nicht angelegt werden. Die klassische Proje
 
 ## Empfohlener nächster Entwicklungsschritt
 
-Als nächster technischer Schritt sollte `FDS.Hydraulics` um ein Pumpen-Grundmodell ergänzt werden. Danach ist die fachliche Reihenfolge für einfache Stränge und anschließend den Netzsolver vorbereitet.
+Als nächster technischer Schritt sollte `FDS.Hydraulics` eine einfache Strangberechnung ohne vollständigen Netzwerksolver erhalten. Danach ist die fachliche Reihenfolge für den hydraulischen Netzsolver vorbereitet.
