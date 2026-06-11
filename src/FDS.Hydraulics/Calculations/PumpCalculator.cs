@@ -39,6 +39,25 @@ public static class PumpCalculator
             * headMeters;
     }
 
+    public static double CalculatePressureIncreasePascals(
+        Pump pump,
+        Fluid fluid,
+        double volumetricFlowRateCubicMetersPerSecond,
+        double gravitationalAccelerationMetersPerSecondSquared = StandardGravityMetersPerSecondSquared)
+    {
+        ArgumentNullException.ThrowIfNull(pump);
+        ArgumentNullException.ThrowIfNull(fluid);
+        HydraulicValidation.EnsurePositiveFinite(
+            gravitationalAccelerationMetersPerSecondSquared,
+            nameof(gravitationalAccelerationMetersPerSecondSquared));
+
+        var headMeters = pump.Curve.InterpolateHeadMeters(volumetricFlowRateCubicMetersPerSecond);
+
+        return fluid.DensityKilogramsPerCubicMeter
+            * gravitationalAccelerationMetersPerSecondSquared
+            * headMeters;
+    }
+
     public static double CalculateShaftPowerWatts(
         Pump pump,
         Fluid fluid,

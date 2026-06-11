@@ -45,6 +45,19 @@ public sealed class PumpCalculatorTests
     }
 
     [Fact]
+    public void CalculatePressureIncreasePascals_ConvertsHeadToPressure()
+    {
+        var pump = CreatePump();
+
+        var pressureIncrease = PumpCalculator.CalculatePressureIncreasePascals(
+            pump,
+            Water,
+            volumetricFlowRateCubicMetersPerSecond: 0.01);
+
+        Assert.Equal(1000 * 9.80665 * 25, pressureIncrease, precision: 6);
+    }
+
+    [Fact]
     public void CalculateHydraulicPowerWatts_RejectsNonPositiveGravity()
     {
         var pump = CreatePump();

@@ -1,8 +1,8 @@
 # FDS.Hydraulics Modellgrundlage
 
-Stand: 2026-06-10
+Stand: 2026-06-11
 
-`FDS.Hydraulics` enthält erste hydraulische Einzelrohr-, Einzelwiderstands- und Pumpen-Bausteine. Das Modul berechnet lokale Kennwerte für ein Rohr, Armaturen, Ventile und eine einzelne Pumpe, löst aber kein Netzwerk.
+`FDS.Hydraulics` enthält erste hydraulische Einzelrohr-, Einzelwiderstands-, Pumpen- und Strang-Bausteine. Das Modul berechnet lokale Kennwerte für ein Rohr, Armaturen, Ventile, eine einzelne Pumpe und einen einfachen Strang bei vorgegebenem Volumenstrom, löst aber kein Netzwerk.
 
 ## Enthalten
 
@@ -19,6 +19,9 @@ Stand: 2026-06-10
 | `PumpCurve` | Förderhöhenkennlinie aus Volumenstrom/Förderhöhe-Stützpunkten. |
 | `PumpEfficiencyCurve` | Optionale Wirkungsgradkennlinie aus Volumenstrom/Wirkungsgrad-Stützpunkten. |
 | `PumpCalculator` | Einzelpumpen-Hilfsrechnungen für Kennlinie und Leistung. |
+| `HydraulicBranch` | Einfacher hydraulischer Strang aus Rohren, lokalen Widerständen, Armaturen, Ventilen und optionaler Pumpe. |
+| `HydraulicBranchResult` | Ergebnisobjekt für Druckverlust, Pumpendruckerhöhung und Netto-Druckbilanz. |
+| `HydraulicBranchCalculator` | Aggregiert Strangkomponenten bei einem vorgegebenen Volumenstrom. |
 
 ## Berechnungen
 
@@ -34,6 +37,8 @@ Stand: 2026-06-10
 | Interpolierte Pumpen-Förderhöhe | m | `InterpolateHeadMeters` |
 | Hydraulische Pumpenleistung | W | `CalculateHydraulicPowerWatts` |
 | Pumpen-Wellenleistung | W | `CalculateShaftPowerWatts` |
+| Pumpen-Druckerhöhung | Pa | `CalculatePressureIncreasePascals` |
+| Strang-Druckbilanz | Pa | `HydraulicBranchCalculator.Calculate` |
 
 ## Einheiten
 
@@ -52,6 +57,7 @@ Stand: 2026-06-10
 | Pumpen-Förderhöhe | m |
 | Pumpenleistung | W |
 | Wirkungsgrad | dimensionslos, 0 < eta <= 1 |
+| Netto-Druckbilanz | Pa |
 
 ## Reibungszahl-Modell
 
@@ -98,12 +104,43 @@ Optional kann `PumpEfficiencyCurve` eine Wirkungsgradkennlinie hinterlegen. Dara
 P_shaft = P_h / eta
 ```
 
-Das Pumpenmodell berechnet keinen automatischen Betriebspunkt und koppelt die Pumpe noch nicht mit Rohr-, Armaturen- oder Netzwerkwiderständen.
+Das Pumpenmodell selbst berechnet keinen automatischen Betriebspunkt. Die einfache Strangberechnung kann Pumpen-Druckerhöhung und Komponentenverluste bei einem vorgegebenen Volumenstrom aggregieren.
+
+## Strangberechnung
+
+`HydraulicBranch` fasst eine einfache Strangtopologie zusammen:
+
+- Rohre
+- generische Einzelwiderstände
+- Armaturen/Formstücke
+- Ventile
+- optionale Pumpe
+
+`HydraulicBranchCalculator.Calculate` wertet den Strang für einen vorgegebenen, nichtnegativen Volumenstrom aus. Das Ergebnis enthält:
+
+- Volumenstrom in m³/s
+- Summe Rohrdruckverluste in Pa
+- Summe Einzelwiderstände in Pa
+- Pumpen-Druckerhöhung in Pa
+- Netto-Druckbilanz in Pa
+
+Die Netto-Druckbilanz wird berechnet als:
+
+```text
+dp_net = dp_pump - dp_pipe - dp_local
+```
+
+Positive Werte bedeuten, dass die Pumpen-Druckerhöhung die aggregierten Verluste übersteigt. Negative Werte bedeuten, dass die Verluste größer als die Pumpen-Druckerhöhung sind.
+
+Zeta-basierte Einzelwiderstände benötigen eine Bezugsgeschwindigkeit. In diesem ersten einfachen Strangmodell wird dafür `HydraulicBranch.LocalResistanceReferencePipe` verwendet. Standardmäßig ist das die erste Pipe des Strangs. Eine spätere Segmentmodellierung kann Einzelwiderstände bauteilscharf einzelnen Rohrabschnitten zuordnen.
+
+Ventile mit `ValveFlowCoefficient` werden in der Strangberechnung über Kv berechnet. Ist kein Kv/Kvs-Datensatz vorhanden, wird der optionale Zeta-Widerstand verwendet.
 
 ## Grenzen
 
 - Kein kompletter hydraulischer Netzwerksolver
 - Keine automatische Pumpen-Betriebspunktberechnung
+- Keine iterative Stranglösung
 - Keine Pumpenregelstrategie
 - Keine Regelventil-Auslegung
 - Keine Regelungstechnik

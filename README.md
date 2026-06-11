@@ -16,7 +16,7 @@ Fluid Dynamics Simulator (FDS) ist eine Simulationsplattform für technische Geb
 
 Die erste Grundstruktur für `FDS.Core` ist vorhanden. Sie enthält Basismodelle für Netzwerke, Knoten, Kanten und Fluide sowie Unit Tests für die grundlegenden Validierungen.
 
-`FDS.Hydraulics` ist als nächstes Modul angelegt. Es enthält ein Rohrmodell, Einzelrohr-Berechnungen für Strömungsgeschwindigkeit, Reynoldszahl, einfache Reibungszahl-Abschätzung und vorbereiteten Darcy-Weisbach-Druckverlust. Zusätzlich sind Armaturen-/Einzelwiderstandsmodelle mit Zeta-Druckverlust sowie ein Kv/Kvs-Grundmodell für Ventile vorbereitet. Ein Pumpen-Grundmodell mit Kennlinien-Stützpunkten, linearer Förderhöheninterpolation, hydraulischer Leistung und optionaler Wirkungsgradkennlinie ist ebenfalls enthalten. Es ist noch kein kompletter Netzwerksolver implementiert.
+`FDS.Hydraulics` ist als nächstes Modul angelegt. Es enthält ein Rohrmodell, Einzelrohr-Berechnungen für Strömungsgeschwindigkeit, Reynoldszahl, einfache Reibungszahl-Abschätzung und vorbereiteten Darcy-Weisbach-Druckverlust. Zusätzlich sind Armaturen-/Einzelwiderstandsmodelle mit Zeta-Druckverlust sowie ein Kv/Kvs-Grundmodell für Ventile vorbereitet. Ein Pumpen-Grundmodell mit Kennlinien-Stützpunkten, linearer Förderhöheninterpolation, hydraulischer Leistung und optionaler Wirkungsgradkennlinie ist ebenfalls enthalten. Eine einfache Strangberechnung aggregiert diese Bausteine bei vorgegebenem Volumenstrom. Es ist noch kein kompletter Netzwerksolver implementiert.
 
 ## Projektstruktur
 
@@ -31,11 +31,14 @@ src/
       Temperature.cs
   FDS.Hydraulics/
     Calculations/
+      HydraulicBranchCalculator.cs
       LocalResistanceCalculator.cs
       PipeFlowCalculator.cs
       PumpCalculator.cs
     Models/
       Fitting.cs
+      HydraulicBranch.cs
+      HydraulicBranchResult.cs
       LocalResistance.cs
       Pipe.cs
       Pump.cs
@@ -75,6 +78,8 @@ tests/
 - `Pump`: Pumpen-Grundmodell mit Förderhöhenkennlinie und optionaler Wirkungsgradkennlinie.
 - `PumpCurve`: Kennlinie aus Volumenstrom/Förderhöhe-Stützpunkten mit linearer Interpolation.
 - `PumpCalculator`: Einzelpumpen-Hilfsrechnungen für Förderhöhe, hydraulische Leistung und optionale Wellenleistung.
+- `HydraulicBranch`: einfacher hydraulischer Strang aus Rohren, Einzelwiderständen, Armaturen, Ventilen und optionaler Pumpe.
+- `HydraulicBranchCalculator`: Druckbilanz bei vorgegebenem Volumenstrom ohne Iteration und ohne Netzwerksolver.
 
 ## Einheiten
 
@@ -96,6 +101,7 @@ tests/
 | Pumpen-Förderhöhe | m | `PumpCurvePoint.HeadMeters` |
 | Pumpenleistung | W | Ergebnis `CalculateHydraulicPowerWatts` |
 | Wirkungsgrad | dimensionslos | `PumpEfficiencyPoint.Efficiency` |
+| Netto-Druckbilanz | Pa | `HydraulicBranchResult.NetPressureBalancePascals` |
 
 ## Validierungen
 
@@ -118,11 +124,14 @@ tests/
 - Volumenstrom- und Förderhöhen-Stützpunkte dürfen nicht negativ sein.
 - Förderhöhe darf mit steigendem Volumenstrom nicht steigen.
 - Wirkungsgrade müssen größer als 0 und kleiner oder gleich 1 sein.
+- Hydraulische Stränge benötigen mindestens ein Rohr.
+- Strangberechnungen akzeptieren aktuell nur nichtnegative Volumenströme in m³/s.
 
 ## Nicht enthalten
 
 - Kein kompletter hydraulischer Netzwerksolver
 - Keine automatische Pumpen-Betriebspunktberechnung
+- Keine iterative Stranglösung
 - Keine Pumpenregelstrategie
 - Keine vollständige Regelventil-Auslegung
 - Keine UI

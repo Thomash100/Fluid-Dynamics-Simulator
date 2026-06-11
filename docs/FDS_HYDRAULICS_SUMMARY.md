@@ -1,6 +1,6 @@
 # Abschlusszusammenfassung FDS.Hydraulics Bausteine
 
-Stand: 2026-06-10
+Stand: 2026-06-11
 
 ## Ergebnis
 
@@ -37,12 +37,18 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 - Lineare Förderhöheninterpolation bei gegebenem Volumenstrom
 - Hydraulische Pumpenleistung
 - Optionale Wellenleistung aus Wirkungsgradkennlinie
-- Unit Tests für Rohrmodell, Einzelwiderstände, Ventile und Pumpen
+- Pumpen-Druckerhöhung in Pa
+- Modell `HydraulicBranch`
+- Ergebnisobjekt `HydraulicBranchResult`
+- Strangberechnung `HydraulicBranchCalculator`
+- Aggregation von Rohrdruckverlusten, Einzelwiderständen und Pumpen-Druckerhöhung bei vorgegebenem Volumenstrom
+- Unit Tests für Rohrmodell, Einzelwiderstände, Ventile, Pumpen und Strangberechnung
 
 ## Nicht umgesetzt
 
 - Kein kompletter Netzwerksolver
 - Keine automatische Pumpen-Betriebspunktberechnung
+- Keine iterative Stranglösung
 - Keine Pumpenregelstrategie
 - Keine Regelventil-Auslegung
 - Keine UI
@@ -53,4 +59,4 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 dotnet test FluidDynamicsSimulator.sln
 ```
 
-Ergebnis: 77 Tests bestanden.
+Ergebnis: 88 Tests bestanden.
