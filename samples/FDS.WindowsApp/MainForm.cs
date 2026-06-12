@@ -14,7 +14,7 @@ public sealed class MainForm : Form
 
     public MainForm()
     {
-        Text = "Fluid Dynamics Simulator - Windows App Test";
+        Text = "Fluid Dynamics Simulator - Windows-App-Test";
         MinimumSize = new Size(920, 620);
         StartPosition = FormStartPosition.CenterScreen;
 
@@ -34,7 +34,7 @@ public sealed class MainForm : Form
         {
             AutoSize = true,
             Font = new Font(Font.FontFamily, 14, FontStyle.Bold),
-            Text = "Hydraulic Solver Reference Test",
+            Text = "Hydraulischer Solver-Referenztest",
         };
 
         var parameterGrid = new TableLayoutPanel
@@ -55,9 +55,9 @@ public sealed class MainForm : Form
         branchBZetaInput = CreateNumericInput(0, 10_000, 0.1M, decimalPlaces: 3);
         totalFlowInput = CreateNumericInput(0, 100, 0.001M, decimalPlaces: 8);
 
-        AddInputRow(parameterGrid, 0, "Pressure difference Pa", pressureDifferenceInput, "Pipe diameter m", pipeDiameterInput);
-        AddInputRow(parameterGrid, 1, "Branch A zeta", branchAZetaInput, "Branch B zeta", branchBZetaInput);
-        AddInputRow(parameterGrid, 2, "Total flow m3/s", totalFlowInput, string.Empty, null);
+        AddInputRow(parameterGrid, 0, "Druckdifferenz Pa", pressureDifferenceInput, "Rohrdurchmesser m", pipeDiameterInput);
+        AddInputRow(parameterGrid, 1, "Zeta Strang A", branchAZetaInput, "Zeta Strang B", branchBZetaInput);
+        AddInputRow(parameterGrid, 2, "Gesamtvolumenstrom m3/s", totalFlowInput, string.Empty, null);
 
         var commandPanel = new FlowLayoutPanel
         {
@@ -70,14 +70,14 @@ public sealed class MainForm : Form
         var runButton = new Button
         {
             AutoSize = true,
-            Text = "Run Solver Test",
+            Text = "Solver-Test starten",
         };
         runButton.Click += (_, _) => RunScenario();
 
         var resetButton = new Button
         {
             AutoSize = true,
-            Text = "Reset",
+            Text = "Zurücksetzen",
         };
         resetButton.Click += (_, _) =>
         {
@@ -89,7 +89,7 @@ public sealed class MainForm : Form
         {
             AutoSize = true,
             Padding = new Padding(12, 7, 0, 0),
-            Text = "Ready",
+            Text = "Bereit",
         };
 
         commandPanel.Controls.Add(runButton);
@@ -122,13 +122,13 @@ public sealed class MainForm : Form
         {
             SolverScenarioParameters parameters = ReadInputValues();
             HydraulicSolverResult result = SolverScenarioRunner.RunParallelBranchScenario(parameters);
-            statusLabel.Text = $"Status: {result.Status}";
+            statusLabel.Text = $"Status: {SolverScenarioRunner.FormatStatus(result.Status)}";
             outputTextBox.Text = SolverScenarioRunner.FormatResult(result, parameters);
         }
         catch (Exception ex)
         {
-            statusLabel.Text = "Status: Failed";
-            outputTextBox.Text = ex.ToString();
+            statusLabel.Text = "Status: Fehler";
+            outputTextBox.Text = $"Fehler beim Ausführen des Solver-Tests:{Environment.NewLine}{ex}";
         }
     }
 

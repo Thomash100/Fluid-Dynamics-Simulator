@@ -9,6 +9,8 @@ internal static class Program
     {
         if (args.Contains("--smoke-test", StringComparer.OrdinalIgnoreCase))
         {
+            TryConfigureConsoleOutputEncoding();
+
             HydraulicSolverResult result = SolverScenarioRunner.RunParallelBranchScenario();
             Console.WriteLine(SolverScenarioRunner.FormatResult(result));
 
@@ -22,5 +24,17 @@ internal static class Program
         Application.Run(new MainForm());
 
         return 0;
+    }
+
+    private static void TryConfigureConsoleOutputEncoding()
+    {
+        try
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+        }
+        catch (IOException)
+        {
+            // WinExe smoke tests can run without a normal console handle.
+        }
     }
 }
