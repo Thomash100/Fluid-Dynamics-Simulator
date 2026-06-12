@@ -1,6 +1,6 @@
 # Abschlusszusammenfassung FDS.Hydraulics Bausteine
 
-Stand: 2026-06-11
+Stand: 2026-06-12
 
 ## Ergebnis
 
@@ -49,13 +49,21 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 - Ermittlung des ungünstigsten Strangs
 - Erforderliche Mindest-Pumpendruckerhöhung in Pa
 - Optionale erforderliche Förderhöhe in m bei positiver Fluiddichte
-- Unit Tests für Rohrmodell, Einzelwiderstände, Ventile, Pumpen, Strangberechnung und Netzwerkauswertung
+- Solver-Optionen `HydraulicSolverOptions`
+- Solver-Status `HydraulicSolverStatus`
+- Randbedingungen `HydraulicBoundaryCondition`
+- Knotenbilanz `HydraulicNodeBalance`
+- Druckresidual `HydraulicPressureResidual`
+- Solver-Vorbereitungsergebnis `HydraulicSolverResult`
+- Residualvorbereitung `HydraulicSolverPreparationCalculator`
+- Unit Tests für Rohrmodell, Einzelwiderstände, Ventile, Pumpen, Strangberechnung, Netzwerkauswertung und Solver-Vorbereitung
 
 ## Nicht umgesetzt
 
 - Kein kompletter Netzwerksolver
 - Kein automatischer Volumenstromabgleich
 - Keine automatische Pumpen-Betriebspunktberechnung
+- Keine Newton-, Hardy-Cross- oder Gradient-Iteration
 - Keine iterative Stranglösung
 - Keine Pumpenkennlinienauswahl
 - Keine Pumpenregelstrategie
@@ -68,4 +76,4 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 dotnet test FluidDynamicsSimulator.sln
 ```
 
-Ergebnis: 99 Tests bestanden.
+Ergebnis: 113 Tests bestanden.

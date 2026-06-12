@@ -16,7 +16,7 @@ Fluid Dynamics Simulator (FDS) ist eine Simulationsplattform für technische Geb
 
 Die erste Grundstruktur für `FDS.Core` ist vorhanden. Sie enthält Basismodelle für Netzwerke, Knoten, Kanten und Fluide sowie Unit Tests für die grundlegenden Validierungen.
 
-`FDS.Hydraulics` ist als nächstes Modul angelegt. Es enthält ein Rohrmodell, Einzelrohr-Berechnungen für Strömungsgeschwindigkeit, Reynoldszahl, einfache Reibungszahl-Abschätzung und vorbereiteten Darcy-Weisbach-Druckverlust. Zusätzlich sind Armaturen-/Einzelwiderstandsmodelle mit Zeta-Druckverlust sowie ein Kv/Kvs-Grundmodell für Ventile vorbereitet. Ein Pumpen-Grundmodell mit Kennlinien-Stützpunkten, linearer Förderhöheninterpolation, hydraulischer Leistung und optionaler Wirkungsgradkennlinie ist ebenfalls enthalten. Eine einfache Strangberechnung aggregiert diese Bausteine bei vorgegebenem Volumenstrom. Eine feste Netzwerkauswertung fasst mehrere Stränge mit bekannten Volumenströmen zusammen und ermittelt den ungünstigsten Strang sowie die erforderliche Mindest-Pumpendruckerhöhung. Es ist noch kein kompletter Netzwerksolver implementiert.
+`FDS.Hydraulics` ist als nächstes Modul angelegt. Es enthält ein Rohrmodell, Einzelrohr-Berechnungen für Strömungsgeschwindigkeit, Reynoldszahl, einfache Reibungszahl-Abschätzung und vorbereiteten Darcy-Weisbach-Druckverlust. Zusätzlich sind Armaturen-/Einzelwiderstandsmodelle mit Zeta-Druckverlust sowie ein Kv/Kvs-Grundmodell für Ventile vorbereitet. Ein Pumpen-Grundmodell mit Kennlinien-Stützpunkten, linearer Förderhöheninterpolation, hydraulischer Leistung und optionaler Wirkungsgradkennlinie ist ebenfalls enthalten. Eine einfache Strangberechnung aggregiert diese Bausteine bei vorgegebenem Volumenstrom. Eine feste Netzwerkauswertung fasst mehrere Stränge mit bekannten Volumenströmen zusammen und ermittelt den ungünstigsten Strang sowie die erforderliche Mindest-Pumpendruckerhöhung. Die Vorbereitung für einen iterativen Solver ergänzt Randbedingungen, Knotenbilanzen und Residualwerte, ohne bereits einen vollständigen Netzwerksolver zu implementieren.
 
 ## Projektstruktur
 
@@ -33,6 +33,7 @@ src/
     Calculations/
       HydraulicBranchCalculator.cs
       HydraulicNetworkCalculator.cs
+      HydraulicSolverPreparationCalculator.cs
       LocalResistanceCalculator.cs
       PipeFlowCalculator.cs
       PumpCalculator.cs
@@ -41,9 +42,16 @@ src/
       HydraulicBranch.cs
       HydraulicBranchFlow.cs
       HydraulicBranchResult.cs
+      HydraulicBoundaryCondition.cs
+      HydraulicBoundaryConditionKind.cs
       HydraulicNetwork.cs
       HydraulicNetworkBranchResult.cs
       HydraulicNetworkResult.cs
+      HydraulicNodeBalance.cs
+      HydraulicPressureResidual.cs
+      HydraulicSolverOptions.cs
+      HydraulicSolverResult.cs
+      HydraulicSolverStatus.cs
       LocalResistance.cs
       Pipe.cs
       Pump.cs
@@ -87,6 +95,10 @@ tests/
 - `HydraulicBranchCalculator`: Druckbilanz bei vorgegebenem Volumenstrom ohne Iteration und ohne Netzwerksolver.
 - `HydraulicNetwork`: feste Netzwerkauswertung aus mehreren Strängen mit bekannten Volumenströmen.
 - `HydraulicNetworkCalculator`: wertet alle Stränge aus, bestimmt den ungünstigsten Strang und die erforderliche Mindest-Pumpendruckerhöhung.
+- `HydraulicBoundaryCondition`: Randbedingungen für Quelle, Senke, bekannten Druck, bekannte Druckdifferenz oder Pumpenkennlinie.
+- `HydraulicNodeBalance`: Knotenbilanz mit Residualwert für Volumenstrom.
+- `HydraulicPressureResidual`: Druckresidual für spätere Edge-/Stranggleichungen.
+- `HydraulicSolverPreparationCalculator`: bereitet Knoten- und Druckresiduen für einen späteren iterativen Solver vor.
 
 ## Einheiten
 
@@ -111,6 +123,8 @@ tests/
 | Netto-Druckbilanz | Pa | `HydraulicBranchResult.NetPressureBalancePascals` |
 | Erforderliche Pumpendruckerhöhung | Pa | `HydraulicNetworkResult.RequiredPumpPressureIncreasePascals` |
 | Erforderliche Förderhöhe | m | `HydraulicNetworkResult.RequiredPumpHeadMeters` |
+| Knotenbilanz-Residual | m³/s | `HydraulicNodeBalance.ResidualFlowCubicMetersPerSecond` |
+| Druck-Residual | Pa | `HydraulicPressureResidual.ResidualPressurePascals` |
 
 ## Validierungen
 
@@ -138,12 +152,15 @@ tests/
 - Hydraulische Netzwerke benötigen mindestens einen Strang.
 - Strang-IDs müssen innerhalb eines hydraulischen Netzwerks eindeutig sein.
 - Vorgegebene Netzwerk-Volumenströme dürfen nicht negativ sein.
+- Solver-Optionen benötigen positive Toleranzen und eine Relaxation im Bereich 0 < r <= 1.
+- Solver-Randbedingungen dürfen nur bekannte Knoten referenzieren.
 
 ## Nicht enthalten
 
 - Kein kompletter hydraulischer Netzwerksolver
 - Kein automatischer Volumenstromabgleich
 - Keine automatische Pumpen-Betriebspunktberechnung
+- Keine Newton-, Hardy-Cross- oder Gradient-Iteration
 - Keine iterative Stranglösung
 - Keine Pumpenkennlinienauswahl
 - Keine Pumpenregelstrategie

@@ -1,6 +1,6 @@
 # Projektzusammenfassung
 
-Stand: 2026-06-11
+Stand: 2026-06-12
 
 Repository: https://github.com/Thomash100/Fluid-Dynamics-Simulator
 
@@ -31,6 +31,7 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 - Ein Pumpen-Grundmodell mit Kennlinie, Förderhöheninterpolation, hydraulischer Leistung und optionaler Wirkungsgradkennlinie ist implementiert.
 - Eine einfache hydraulische Strangberechnung aggregiert Rohrverluste, Einzelwiderstände und Pumpen-Druckerhöhung bei vorgegebenem Volumenstrom.
 - Eine feste hydraulische Netzwerkauswertung für mehrere Stränge mit bekannten Volumenströmen ermittelt BranchResults, den ungünstigsten Strang und die erforderliche Mindest-Pumpendruckerhöhung.
+- Die Vorbereitung für einen iterativen hydraulischen Netzwerksolver enthält Solver-Optionen, Randbedingungen, Knotenbilanzen und Druckresiduen ohne vollständige Iteration.
 
 ## Milestones
 
@@ -85,6 +86,12 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 | `HydraulicNetworkBranchResult` | Implementiert als Netzwerk-Ergebnis für einen einzelnen Strang. |
 | `HydraulicNetworkResult` | Implementiert mit allen BranchResults, kritischem Strang, erforderlicher Pumpendruckerhöhung und optionaler Förderhöhe. |
 | `HydraulicNetworkCalculator` | Implementiert für Netzwerkauswertung ohne Volumenstromabgleich, Solver oder Iteration. |
+| `HydraulicSolverOptions` | Implementiert mit Iterationslimit, Flow-Residualtoleranz, Druck-Residualtoleranz und Relaxationsfaktor. |
+| `HydraulicBoundaryCondition` | Implementiert für Quelle, Senke, bekannten Druck, bekannte Druckdifferenz und Pumpenkennlinie. |
+| `HydraulicNodeBalance` | Implementiert mit Residualkonvention `Q_in + Q_source - Q_out - Q_sink`. |
+| `HydraulicPressureResidual` | Implementiert mit Residualkonvention `dp_available - dp_required`. |
+| `HydraulicSolverResult` | Implementiert für vorbereitete Residualdaten mit Status und Iterationszahl. |
+| `HydraulicSolverPreparationCalculator` | Implementiert für Knotenbilanz- und Druckresidualauswertung ohne Iteration. |
 
 ## Einheiten
 
@@ -105,6 +112,8 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 - Strang-Druckbilanz: Pa
 - Erforderliche Pumpendruckerhöhung: Pa
 - Erforderliche Förderhöhe: m
+- Knotenbilanz-Residual: m³/s
+- Druck-Residual: Pa
 
 ## Validierung
 
@@ -131,6 +140,8 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 - Kein hydraulisches Netzwerk ohne Strang
 - Keine doppelten Strang-IDs innerhalb eines hydraulischen Netzwerks
 - Kein negativer vorgegebener Netzwerk-Volumenstrom
+- Keine Solver-Optionen mit ungültigen Toleranzen oder Relaxationsfaktoren
+- Keine Solver-Randbedingungen auf unbekannte Knoten
 
 ## Dokumentation
 
@@ -147,4 +158,4 @@ Ein GitHub Project Board konnte noch nicht angelegt werden. Die klassische Proje
 
 ## Empfohlener nächster Entwicklungsschritt
 
-Als nächster technischer Schritt sollte `FDS.Hydraulics` eine einfache Betriebspunktberechnung für einen einzelnen Strang erhalten. Danach ist die fachliche Reihenfolge für Pumpenauswahl, mehrere gekoppelte Stränge und anschließend den hydraulischen Netzsolver vorbereitet.
+Als nächster technischer Schritt sollte auf Basis der vorbereiteten Residuen ein einfacher iterativer Referenzsolver für kleine Netze ausgewählt und isoliert implementiert werden. Dafür kommen zunächst eng begrenzte Ansätze wie Hardy-Cross für einfache Schleifen oder ein kleiner Newton-Residualsolver mit klaren Randbedingungen in Frage.
