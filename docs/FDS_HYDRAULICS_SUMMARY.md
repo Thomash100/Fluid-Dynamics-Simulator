@@ -12,6 +12,7 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 - `src/FDS.Hydraulics`
 - `tests/FDS.Core.Tests`
 - `tests/FDS.Hydraulics.Tests`
+- `samples/FDS.WindowsApp`
 
 ## Umgesetzter Umfang
 
@@ -61,6 +62,8 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 - Iterationssnapshot `HydraulicSolverIteration`
 - Kleiner Referenzsolver `SmallHydraulicNetworkSolver`
 - Status `MaxIterationsReached`
+- Konfigurierbare WinForms-Test-App für den Referenzsolver
+- Smoke-Test-Modus der Windows-App über `--smoke-test`
 - Unit Tests für Rohrmodell, Einzelwiderstände, Ventile, Pumpen, Strangberechnung, Netzwerkauswertung, Solver-Vorbereitung und kleinen Referenzsolver
 
 ## Nicht umgesetzt
@@ -72,7 +75,7 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 - Keine Pumpenkennlinienauswahl
 - Keine Pumpenregelstrategie
 - Keine Regelventil-Auslegung
-- Keine UI
+- Keine produktive UI; nur eine WinForms-Test-App als lokales Solver-Test-Harness
 
 ## Verifikation
 
@@ -81,3 +84,5 @@ dotnet test FluidDynamicsSimulator.sln
 ```
 
 Ergebnis: 119 Tests bestanden.
+
+Zusätzlich wurde die Windows-Test-App lokal als `win-x64` veröffentlicht und über `FDS.WindowsApp.exe --smoke-test` geprüft.

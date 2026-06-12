@@ -18,6 +18,8 @@ Die erste Grundstruktur für `FDS.Core` ist vorhanden. Sie enthält Basismodelle
 
 `FDS.Hydraulics` ist als nächstes Modul angelegt. Es enthält ein Rohrmodell, Einzelrohr-Berechnungen für Strömungsgeschwindigkeit, Reynoldszahl, einfache Reibungszahl-Abschätzung und vorbereiteten Darcy-Weisbach-Druckverlust. Zusätzlich sind Armaturen-/Einzelwiderstandsmodelle mit Zeta-Druckverlust sowie ein Kv/Kvs-Grundmodell für Ventile vorbereitet. Ein Pumpen-Grundmodell mit Kennlinien-Stützpunkten, linearer Förderhöheninterpolation, hydraulischer Leistung und optionaler Wirkungsgradkennlinie ist ebenfalls enthalten. Eine einfache Strangberechnung aggregiert diese Bausteine bei vorgegebenem Volumenstrom. Eine feste Netzwerkauswertung fasst mehrere Stränge mit bekannten Volumenströmen zusammen und ermittelt den ungünstigsten Strang sowie die erforderliche Mindest-Pumpendruckerhöhung. Zusätzlich ist ein erster kleiner iterativer Referenzsolver für vorbereitete Netzwerke enthalten. Er nutzt Knotenbilanz- und Druckresiduen, ist aber noch kein allgemeiner Netzwerksolver.
 
+Unter `samples/FDS.WindowsApp` liegt eine kleine WinForms-Test-App für den Referenzsolver. Sie dient nur als konfigurierbares Test-Harness und ist keine produktive Oberfläche.
+
 ## Projektstruktur
 
 ```text
@@ -69,6 +71,9 @@ src/
 tests/
   FDS.Core.Tests/
   FDS.Hydraulics.Tests/
+
+samples/
+  FDS.WindowsApp/
 ```
 
 ## Core-Basismodelle
@@ -173,7 +178,7 @@ tests/
 - Keine Pumpenkennlinienauswahl
 - Keine Pumpenregelstrategie
 - Keine vollständige Regelventil-Auslegung
-- Keine UI
+- Keine produktive UI; nur eine WinForms-Test-App als lokales Solver-Test-Harness
 - Keine IFC- oder Revit-Schnittstelle
 
 ## Geplante Module
