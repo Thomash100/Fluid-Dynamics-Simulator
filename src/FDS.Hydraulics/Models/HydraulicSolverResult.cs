@@ -5,8 +5,7 @@ using FDS.Hydraulics.Internal;
 namespace FDS.Hydraulics.Models;
 
 /// <summary>
-/// Solver preparation result containing residuals. It is not the output of a
-/// completed iterative solver.
+/// Solver result containing final residuals and optional iteration history.
 /// </summary>
 public sealed class HydraulicSolverResult
 {
@@ -15,7 +14,9 @@ public sealed class HydraulicSolverResult
         int iterations,
         IEnumerable<HydraulicNodeBalance> nodeBalances,
         IEnumerable<HydraulicPressureResidual>? pressureResiduals = null,
-        IEnumerable<HydraulicBoundaryCondition>? boundaryConditions = null)
+        IEnumerable<HydraulicBoundaryCondition>? boundaryConditions = null,
+        IEnumerable<HydraulicSolverIteration>? iterationHistory = null,
+        IReadOnlyDictionary<string, double>? solvedVolumetricFlowRatesCubicMetersPerSecond = null)
     {
         if (iterations < 0)
         {
@@ -27,6 +28,9 @@ public sealed class HydraulicSolverResult
         NodeBalances = ToReadOnlyList(nodeBalances, nameof(nodeBalances));
         PressureResiduals = ToReadOnlyList(pressureResiduals, nameof(pressureResiduals));
         BoundaryConditions = ToReadOnlyList(boundaryConditions, nameof(boundaryConditions));
+        IterationHistory = ToReadOnlyList(iterationHistory, nameof(iterationHistory));
+        SolvedVolumetricFlowRatesCubicMetersPerSecond = ToReadOnlyDictionary(
+            solvedVolumetricFlowRatesCubicMetersPerSecond);
     }
 
     public HydraulicSolverStatus Status { get; }
@@ -38,6 +42,10 @@ public sealed class HydraulicSolverResult
     public IReadOnlyList<HydraulicPressureResidual> PressureResiduals { get; }
 
     public IReadOnlyList<HydraulicBoundaryCondition> BoundaryConditions { get; }
+
+    public IReadOnlyList<HydraulicSolverIteration> IterationHistory { get; }
+
+    public IReadOnlyDictionary<string, double> SolvedVolumetricFlowRatesCubicMetersPerSecond { get; }
 
     public double MaxNodeBalanceResidualCubicMetersPerSecond =>
         NodeBalances.Count == 0
@@ -62,5 +70,22 @@ public sealed class HydraulicSolverResult
             .ToList();
 
         return new ReadOnlyCollection<T>(items);
+    }
+
+    private static IReadOnlyDictionary<string, double> ToReadOnlyDictionary(
+        IReadOnlyDictionary<string, double>? values)
+    {
+        if (values is null)
+        {
+            return new ReadOnlyDictionary<string, double>(
+                new Dictionary<string, double>(StringComparer.Ordinal));
+        }
+
+        var items = values.ToDictionary(
+            pair => HydraulicValidation.RequiredId(pair.Key, nameof(values)),
+            pair => HydraulicValidation.EnsureNonNegativeFinite(pair.Value, nameof(values)),
+            StringComparer.Ordinal);
+
+        return new ReadOnlyDictionary<string, double>(items);
     }
 }

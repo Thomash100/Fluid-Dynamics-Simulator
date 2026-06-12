@@ -2,7 +2,7 @@
 
 Stand: 2026-06-12
 
-`FDS.Hydraulics` enthält erste hydraulische Einzelrohr-, Einzelwiderstands-, Pumpen-, Strang-, Netzwerkauswertungs- und Solver-Vorbereitungsbausteine. Das Modul berechnet lokale Kennwerte für ein Rohr, Armaturen, Ventile, eine einzelne Pumpe, einen einfachen Strang und mehrere bekannte Stränge bei vorgegebenen Volumenströmen. Zusätzlich werden Knotenbilanzen und Residualwerte für einen späteren iterativen Solver vorbereitet. Ein vollständiger Netzwerksolver ist noch nicht enthalten.
+`FDS.Hydraulics` enthält erste hydraulische Einzelrohr-, Einzelwiderstands-, Pumpen-, Strang-, Netzwerkauswertungs- und Solver-Bausteine. Das Modul berechnet lokale Kennwerte für ein Rohr, Armaturen, Ventile, eine einzelne Pumpe, einen einfachen Strang und mehrere bekannte Stränge bei vorgegebenen Volumenströmen. Zusätzlich werden Knotenbilanzen und Residualwerte vorbereitet. Ein erster kleiner Referenzsolver kann vorbereitete Netze iterativ auswerten, ist aber kein allgemeiner Netzwerksolver.
 
 ## Enthalten
 
@@ -34,6 +34,10 @@ Stand: 2026-06-12
 | `HydraulicPressureResidual` | Druckresidual für spätere Kanten- oder Stranggleichungen. |
 | `HydraulicSolverResult` | Ergebnis der Solver-Vorbereitung mit Knotenbilanzen und Druckresiduen. |
 | `HydraulicSolverPreparationCalculator` | Bereitet Residualdaten ohne Iteration oder Solverentscheidung vor. |
+| `IHydraulicNetworkSolver` | Minimale Schnittstelle für hydraulische Solver. |
+| `HydraulicSolverInput` | Eingabeobjekt für Topologie, Branches, Randbedingungen, Startwerte und Optionen. |
+| `HydraulicSolverIteration` | Iterationssnapshot mit Branch-Flüssen und Residuen. |
+| `SmallHydraulicNetworkSolver` | Einfacher Relaxationssolver für kleine vorbereitete Referenznetze. |
 
 ## Berechnungen
 
@@ -54,6 +58,7 @@ Stand: 2026-06-12
 | Netzwerkauswertung | Pa und m | `HydraulicNetworkCalculator.Calculate` |
 | Knotenbilanz | m³/s | `HydraulicSolverPreparationCalculator.Prepare` |
 | Druckresidual | Pa | `HydraulicSolverPreparationCalculator.Prepare` |
+| Kleiner Referenzsolver | m³/s und Pa | `SmallHydraulicNetworkSolver.Solve` |
 
 ## Einheiten
 
@@ -203,13 +208,31 @@ Dabei ist `dp_available` die vorhandene Pumpen-Druckerhöhung im Strang und `dp_
 
 Der Status eines vorbereiteten Ergebnisses ist `Prepared`, die Iterationszahl bleibt `0`.
 
+## Kleiner Referenzsolver
+
+`SmallHydraulicNetworkSolver` implementiert `IHydraulicNetworkSolver`. Er ist für kleine vorbereitete Netze gedacht und verwendet eine einfache Relaxationslogik:
+
+- Branch-Flüsse werden anhand der Knotenbilanz-Residuen korrigiert.
+- Falls eine bekannte Druckdifferenz, bekannte Knotendrücke, eine Pumpenrandbedingung oder eine Branch-Pumpe vorhanden ist, wird der Flow zusätzlich gegen das Druckresidual skaliert.
+- Die Skalierung nutzt die einfache Druckverlustnäherung `Q_neu ~ Q_alt * sqrt(dp_available / dp_required)`.
+- Konvergenz wird nur erreicht, wenn Knotenbilanz-Residual und Druckresidual innerhalb der Toleranzen aus `HydraulicSolverOptions` liegen.
+
+Das Ergebnis enthält:
+
+- Status `Converged`, `MaxIterationsReached` oder `InvalidInput`
+- finale Branch-Flüsse
+- finale Knotenbilanzen
+- finale Druckresiduen
+- vollständigen Iterationsverlauf über `HydraulicSolverIteration`
+
+Der Solver ist ein Referenzsolver für kleine Testnetze. Er ersetzt keinen allgemeinen Newton-, Hardy-Cross- oder Gradienten-Solver.
+
 ## Grenzen
 
-- Kein kompletter hydraulischer Netzwerksolver
+- Kein allgemeiner hydraulischer Netzwerksolver
 - Kein automatischer Volumenstromabgleich
 - Keine automatische Pumpen-Betriebspunktberechnung
 - Keine Newton-, Hardy-Cross- oder Gradient-Iteration
-- Keine iterative Stranglösung
 - Keine Pumpenkennlinienauswahl
 - Keine Pumpenregelstrategie
 - Keine Regelventil-Auslegung
