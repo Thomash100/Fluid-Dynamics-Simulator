@@ -56,15 +56,19 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 - Druckresidual `HydraulicPressureResidual`
 - Solver-Vorbereitungsergebnis `HydraulicSolverResult`
 - Residualvorbereitung `HydraulicSolverPreparationCalculator`
-- Unit Tests für Rohrmodell, Einzelwiderstände, Ventile, Pumpen, Strangberechnung, Netzwerkauswertung und Solver-Vorbereitung
+- Solver-Schnittstelle `IHydraulicNetworkSolver`
+- Solver-Eingabe `HydraulicSolverInput`
+- Iterationssnapshot `HydraulicSolverIteration`
+- Kleiner Referenzsolver `SmallHydraulicNetworkSolver`
+- Status `MaxIterationsReached`
+- Unit Tests für Rohrmodell, Einzelwiderstände, Ventile, Pumpen, Strangberechnung, Netzwerkauswertung, Solver-Vorbereitung und kleinen Referenzsolver
 
 ## Nicht umgesetzt
 
-- Kein kompletter Netzwerksolver
+- Kein allgemeiner Netzwerksolver
 - Kein automatischer Volumenstromabgleich
 - Keine automatische Pumpen-Betriebspunktberechnung
 - Keine Newton-, Hardy-Cross- oder Gradient-Iteration
-- Keine iterative Stranglösung
 - Keine Pumpenkennlinienauswahl
 - Keine Pumpenregelstrategie
 - Keine Regelventil-Auslegung
@@ -76,4 +80,4 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 dotnet test FluidDynamicsSimulator.sln
 ```
 
-Ergebnis: 113 Tests bestanden.
+Ergebnis: 119 Tests bestanden.

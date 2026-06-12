@@ -16,7 +16,7 @@ Fluid Dynamics Simulator (FDS) ist eine Simulationsplattform für technische Geb
 
 Die erste Grundstruktur für `FDS.Core` ist vorhanden. Sie enthält Basismodelle für Netzwerke, Knoten, Kanten und Fluide sowie Unit Tests für die grundlegenden Validierungen.
 
-`FDS.Hydraulics` ist als nächstes Modul angelegt. Es enthält ein Rohrmodell, Einzelrohr-Berechnungen für Strömungsgeschwindigkeit, Reynoldszahl, einfache Reibungszahl-Abschätzung und vorbereiteten Darcy-Weisbach-Druckverlust. Zusätzlich sind Armaturen-/Einzelwiderstandsmodelle mit Zeta-Druckverlust sowie ein Kv/Kvs-Grundmodell für Ventile vorbereitet. Ein Pumpen-Grundmodell mit Kennlinien-Stützpunkten, linearer Förderhöheninterpolation, hydraulischer Leistung und optionaler Wirkungsgradkennlinie ist ebenfalls enthalten. Eine einfache Strangberechnung aggregiert diese Bausteine bei vorgegebenem Volumenstrom. Eine feste Netzwerkauswertung fasst mehrere Stränge mit bekannten Volumenströmen zusammen und ermittelt den ungünstigsten Strang sowie die erforderliche Mindest-Pumpendruckerhöhung. Die Vorbereitung für einen iterativen Solver ergänzt Randbedingungen, Knotenbilanzen und Residualwerte, ohne bereits einen vollständigen Netzwerksolver zu implementieren.
+`FDS.Hydraulics` ist als nächstes Modul angelegt. Es enthält ein Rohrmodell, Einzelrohr-Berechnungen für Strömungsgeschwindigkeit, Reynoldszahl, einfache Reibungszahl-Abschätzung und vorbereiteten Darcy-Weisbach-Druckverlust. Zusätzlich sind Armaturen-/Einzelwiderstandsmodelle mit Zeta-Druckverlust sowie ein Kv/Kvs-Grundmodell für Ventile vorbereitet. Ein Pumpen-Grundmodell mit Kennlinien-Stützpunkten, linearer Förderhöheninterpolation, hydraulischer Leistung und optionaler Wirkungsgradkennlinie ist ebenfalls enthalten. Eine einfache Strangberechnung aggregiert diese Bausteine bei vorgegebenem Volumenstrom. Eine feste Netzwerkauswertung fasst mehrere Stränge mit bekannten Volumenströmen zusammen und ermittelt den ungünstigsten Strang sowie die erforderliche Mindest-Pumpendruckerhöhung. Zusätzlich ist ein erster kleiner iterativer Referenzsolver für vorbereitete Netzwerke enthalten. Er nutzt Knotenbilanz- und Druckresiduen, ist aber noch kein allgemeiner Netzwerksolver.
 
 ## Projektstruktur
 
@@ -34,9 +34,11 @@ src/
       HydraulicBranchCalculator.cs
       HydraulicNetworkCalculator.cs
       HydraulicSolverPreparationCalculator.cs
+      IHydraulicNetworkSolver.cs
       LocalResistanceCalculator.cs
       PipeFlowCalculator.cs
       PumpCalculator.cs
+      SmallHydraulicNetworkSolver.cs
     Models/
       Fitting.cs
       HydraulicBranch.cs
@@ -49,6 +51,8 @@ src/
       HydraulicNetworkResult.cs
       HydraulicNodeBalance.cs
       HydraulicPressureResidual.cs
+      HydraulicSolverInput.cs
+      HydraulicSolverIteration.cs
       HydraulicSolverOptions.cs
       HydraulicSolverResult.cs
       HydraulicSolverStatus.cs
@@ -99,6 +103,10 @@ tests/
 - `HydraulicNodeBalance`: Knotenbilanz mit Residualwert für Volumenstrom.
 - `HydraulicPressureResidual`: Druckresidual für spätere Edge-/Stranggleichungen.
 - `HydraulicSolverPreparationCalculator`: bereitet Knoten- und Druckresiduen für einen späteren iterativen Solver vor.
+- `IHydraulicNetworkSolver`: minimale Solver-Schnittstelle.
+- `HydraulicSolverInput`: Eingabeobjekt für vorbereitete kleine Netze, Randbedingungen und Startwerte.
+- `HydraulicSolverIteration`: dokumentiert Flüsse und Residuen je Iteration.
+- `SmallHydraulicNetworkSolver`: einfacher Relaxationssolver für kleine Referenznetze.
 
 ## Einheiten
 
@@ -154,14 +162,14 @@ tests/
 - Vorgegebene Netzwerk-Volumenströme dürfen nicht negativ sein.
 - Solver-Optionen benötigen positive Toleranzen und eine Relaxation im Bereich 0 < r <= 1.
 - Solver-Randbedingungen dürfen nur bekannte Knoten referenzieren.
+- Kleine Solver-Netze benötigen topologisch referenzierte Branch-Endpunkte.
 
 ## Nicht enthalten
 
-- Kein kompletter hydraulischer Netzwerksolver
+- Kein allgemeiner hydraulischer Netzwerksolver
 - Kein automatischer Volumenstromabgleich
 - Keine automatische Pumpen-Betriebspunktberechnung
 - Keine Newton-, Hardy-Cross- oder Gradient-Iteration
-- Keine iterative Stranglösung
 - Keine Pumpenkennlinienauswahl
 - Keine Pumpenregelstrategie
 - Keine vollständige Regelventil-Auslegung
