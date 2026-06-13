@@ -4,28 +4,37 @@ namespace FDS.WindowsApp;
 
 public sealed class MainForm : Form
 {
-    private readonly TextBox outputTextBox;
+    private readonly ComboBox presetComboBox;
+    private readonly Label presetDescriptionLabel;
     private readonly NumericUpDown pressureDifferenceInput;
     private readonly NumericUpDown pipeDiameterInput;
     private readonly NumericUpDown branchAZetaInput;
     private readonly NumericUpDown branchBZetaInput;
     private readonly NumericUpDown totalFlowInput;
     private readonly Label statusLabel;
+    private readonly Label statusValueLabel;
+    private readonly Label iterationsValueLabel;
+    private readonly Label nodeResidualValueLabel;
+    private readonly Label pressureResidualValueLabel;
+    private readonly TextBox inputSummaryTextBox;
+    private readonly DataGridView branchFlowGrid;
+    private readonly DataGridView pressureResidualGrid;
+    private readonly DataGridView iterationGrid;
+    private readonly TextBox outputTextBox;
 
     public MainForm()
     {
         Text = "Fluid Dynamics Simulator - Windows-App-Test";
-        MinimumSize = new Size(920, 620);
+        MinimumSize = new Size(1080, 720);
         StartPosition = FormStartPosition.CenterScreen;
 
         var root = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 4,
+            RowCount = 3,
             Padding = new Padding(16),
         };
-        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -36,6 +45,41 @@ public sealed class MainForm : Form
             Font = new Font(Font.FontFamily, 14, FontStyle.Bold),
             Text = "Hydraulischer Solver-Referenztest",
         };
+
+        var presetPanel = new TableLayoutPanel
+        {
+            AutoSize = true,
+            ColumnCount = 3,
+            Dock = DockStyle.Fill,
+            Padding = new Padding(0, 12, 0, 0),
+        };
+        presetPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 190));
+        presetPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 260));
+        presetPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+
+        presetComboBox = new ComboBox
+        {
+            DisplayMember = nameof(SolverScenarioPreset.Name),
+            Dock = DockStyle.Fill,
+            DropDownStyle = ComboBoxStyle.DropDownList,
+        };
+        foreach (SolverScenarioPreset preset in SolverScenarioPreset.All)
+        {
+            presetComboBox.Items.Add(preset);
+        }
+
+        presetDescriptionLabel = new Label
+        {
+            AutoSize = true,
+            Dock = DockStyle.Fill,
+            Padding = new Padding(12, 4, 0, 4),
+            TextAlign = ContentAlignment.MiddleLeft,
+        };
+
+        presetComboBox.SelectedIndexChanged += (_, _) => ApplySelectedPreset(runScenario: true);
+        presetPanel.Controls.Add(CreateInputLabel("Szenario-Preset"), 0, 0);
+        presetPanel.Controls.Add(presetComboBox, 1, 0);
+        presetPanel.Controls.Add(presetDescriptionLabel, 2, 0);
 
         var parameterGrid = new TableLayoutPanel
         {
@@ -81,6 +125,7 @@ public sealed class MainForm : Form
         };
         resetButton.Click += (_, _) =>
         {
+            presetComboBox.SelectedIndex = 0;
             SetInputValues(SolverScenarioParameters.Default);
             RunScenario();
         };
@@ -96,22 +141,57 @@ public sealed class MainForm : Form
         commandPanel.Controls.Add(resetButton);
         commandPanel.Controls.Add(statusLabel);
 
-        outputTextBox = new TextBox
+        var topPanel = new TableLayoutPanel
+        {
+            AutoSize = true,
+            ColumnCount = 1,
+            Dock = DockStyle.Fill,
+        };
+        topPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        topPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        topPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        topPanel.Controls.Add(presetPanel, 0, 0);
+        topPanel.Controls.Add(parameterGrid, 0, 1);
+        topPanel.Controls.Add(commandPanel, 0, 2);
+
+        statusValueLabel = CreateValueLabel();
+        iterationsValueLabel = CreateValueLabel();
+        nodeResidualValueLabel = CreateValueLabel();
+        pressureResidualValueLabel = CreateValueLabel();
+        inputSummaryTextBox = CreateReadOnlyTextBox(wordWrap: false);
+        inputSummaryTextBox.Height = 130;
+
+        branchFlowGrid = CreateGrid(
+            ("Strang", nameof(BranchFlowReportRow.BranchName), 160),
+            ("Volumenstrom", nameof(BranchFlowReportRow.VolumeFlowRateText), 180));
+        pressureResidualGrid = CreateGrid(
+            ("Element", nameof(PressureResidualReportRow.ElementName), 160),
+            ("Residuum", nameof(PressureResidualReportRow.ResidualText), 160),
+            ("Verfügbar", nameof(PressureResidualReportRow.AvailablePressureText), 160),
+            ("Erforderlich", nameof(PressureResidualReportRow.RequiredPressureText), 160));
+        iterationGrid = CreateGrid(
+            ("Iteration", nameof(IterationReportRow.IterationNumberText), 110),
+            ("Knotenbilanz-Residuum", nameof(IterationReportRow.NodeResidualText), 220),
+            ("Druck-Residuum", nameof(IterationReportRow.PressureResidualText), 180));
+        outputTextBox = CreateReadOnlyTextBox(wordWrap: false);
+
+        var resultTabs = new TabControl
         {
             Dock = DockStyle.Fill,
-            Font = new Font(FontFamily.GenericMonospace, 10),
-            Multiline = true,
-            ReadOnly = true,
-            ScrollBars = ScrollBars.Both,
-            WordWrap = false,
         };
+        resultTabs.TabPages.Add(CreateOverviewTab());
+        resultTabs.TabPages.Add(CreateGridTab("Stränge", branchFlowGrid));
+        resultTabs.TabPages.Add(CreateGridTab("Druckresiduen", pressureResidualGrid));
+        resultTabs.TabPages.Add(CreateGridTab("Iterationen", iterationGrid));
+        resultTabs.TabPages.Add(CreateTextTab("Textausgabe", outputTextBox));
 
         root.Controls.Add(headerLabel, 0, 0);
-        root.Controls.Add(parameterGrid, 0, 1);
-        root.Controls.Add(commandPanel, 0, 2);
-        root.Controls.Add(outputTextBox, 0, 3);
+        root.Controls.Add(topPanel, 0, 1);
+        root.Controls.Add(resultTabs, 0, 2);
 
         Controls.Add(root);
+
+        presetComboBox.SelectedIndex = 0;
         SetInputValues(SolverScenarioParameters.Default);
         Load += (_, _) => RunScenario();
     }
@@ -122,13 +202,47 @@ public sealed class MainForm : Form
         {
             SolverScenarioParameters parameters = ReadInputValues();
             HydraulicSolverResult result = SolverScenarioRunner.RunParallelBranchScenario(parameters);
-            statusLabel.Text = $"Status: {SolverScenarioRunner.FormatStatus(result.Status)}";
+            SolverScenarioReport report = SolverScenarioRunner.CreateReport(result, parameters);
+
+            statusLabel.Text = $"Status: {report.StatusText}";
+            statusValueLabel.Text = report.StatusText;
+            iterationsValueLabel.Text = report.IterationsText;
+            nodeResidualValueLabel.Text = report.NodeResidualText;
+            pressureResidualValueLabel.Text = report.PressureResidualText;
+            inputSummaryTextBox.Text = report.InputSummaryText;
+            branchFlowGrid.DataSource = report.BranchFlows.ToList();
+            pressureResidualGrid.DataSource = report.PressureResiduals.ToList();
+            iterationGrid.DataSource = report.Iterations.ToList();
             outputTextBox.Text = SolverScenarioRunner.FormatResult(result, parameters);
         }
         catch (Exception ex)
         {
             statusLabel.Text = "Status: Fehler";
+            statusValueLabel.Text = "Fehler";
+            iterationsValueLabel.Text = "-";
+            nodeResidualValueLabel.Text = "-";
+            pressureResidualValueLabel.Text = "-";
+            inputSummaryTextBox.Clear();
+            branchFlowGrid.DataSource = null;
+            pressureResidualGrid.DataSource = null;
+            iterationGrid.DataSource = null;
             outputTextBox.Text = $"Fehler beim Ausführen des Solver-Tests:{Environment.NewLine}{ex}";
+        }
+    }
+
+    private void ApplySelectedPreset(bool runScenario)
+    {
+        if (presetComboBox.SelectedItem is not SolverScenarioPreset preset)
+        {
+            return;
+        }
+
+        presetDescriptionLabel.Text = preset.Description;
+        SetInputValues(preset.Parameters);
+
+        if (runScenario)
+        {
+            RunScenario();
         }
     }
 
@@ -153,6 +267,49 @@ public sealed class MainForm : Form
         totalFlowInput.Value = ToDecimal(parameters.TotalVolumeFlowRateCubicMetersPerSecond);
     }
 
+    private TabPage CreateOverviewTab()
+    {
+        var page = new TabPage("Übersicht");
+        var panel = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            Padding = new Padding(12),
+        };
+        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 230));
+        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+
+        AddSummaryRow(panel, 0, "Status", statusValueLabel);
+        AddSummaryRow(panel, 1, "Iterationen", iterationsValueLabel);
+        AddSummaryRow(panel, 2, "Knotenbilanz-Residuum", nodeResidualValueLabel);
+        AddSummaryRow(panel, 3, "Druck-Residuum", pressureResidualValueLabel);
+        AddSummaryRow(panel, 4, "Eingaben", inputSummaryTextBox);
+
+        page.Controls.Add(panel);
+        return page;
+    }
+
+    private static TabPage CreateGridTab(string title, DataGridView grid)
+    {
+        var page = new TabPage(title);
+        page.Controls.Add(grid);
+        return page;
+    }
+
+    private static TabPage CreateTextTab(string title, TextBox textBox)
+    {
+        var page = new TabPage(title);
+        page.Controls.Add(textBox);
+        return page;
+    }
+
+    private static void AddSummaryRow(TableLayoutPanel panel, int rowIndex, string labelText, Control valueControl)
+    {
+        panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        panel.Controls.Add(CreateInputLabel(labelText), 0, rowIndex);
+        panel.Controls.Add(valueControl, 1, rowIndex);
+    }
+
     private static NumericUpDown CreateNumericInput(decimal minimum, decimal maximum, decimal increment, int decimalPlaces)
     {
         return new NumericUpDown
@@ -165,6 +322,61 @@ public sealed class MainForm : Form
             TextAlign = HorizontalAlignment.Right,
             ThousandsSeparator = false,
             Width = 150,
+        };
+    }
+
+    private static DataGridView CreateGrid(params (string Header, string PropertyName, int Width)[] columns)
+    {
+        var grid = new DataGridView
+        {
+            AllowUserToAddRows = false,
+            AllowUserToDeleteRows = false,
+            AutoGenerateColumns = false,
+            AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells,
+            BackgroundColor = SystemColors.Window,
+            BorderStyle = BorderStyle.FixedSingle,
+            Dock = DockStyle.Fill,
+            ReadOnly = true,
+            RowHeadersVisible = false,
+            SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+        };
+
+        foreach ((string header, string propertyName, int width) in columns)
+        {
+            grid.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = propertyName,
+                HeaderText = header,
+                Width = width,
+            });
+        }
+
+        return grid;
+    }
+
+    private static Label CreateValueLabel()
+    {
+        return new Label
+        {
+            AutoSize = true,
+            Dock = DockStyle.Fill,
+            Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold),
+            Padding = new Padding(0, 4, 0, 4),
+            Text = "-",
+            TextAlign = ContentAlignment.MiddleLeft,
+        };
+    }
+
+    private static TextBox CreateReadOnlyTextBox(bool wordWrap)
+    {
+        return new TextBox
+        {
+            Dock = DockStyle.Fill,
+            Font = new Font(FontFamily.GenericMonospace, 10),
+            Multiline = true,
+            ReadOnly = true,
+            ScrollBars = ScrollBars.Both,
+            WordWrap = wordWrap,
         };
     }
 

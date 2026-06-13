@@ -1,6 +1,6 @@
 # Projektzusammenfassung
 
-Stand: 2026-06-12
+Stand: 2026-06-13
 
 Repository: https://github.com/Thomash100/Fluid-Dynamics-Simulator
 
@@ -34,7 +34,7 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 - Die Vorbereitung für einen iterativen hydraulischen Netzwerksolver enthält Solver-Optionen, Randbedingungen, Knotenbilanzen und Druckresiduen.
 - Ein erster kleiner iterativer Referenzsolver wertet vorbereitete Netze mit einfacher Relaxation aus und dokumentiert den Iterationsverlauf.
 - Eine konfigurierbare WinForms-Test-App unter `samples/FDS.WindowsApp` prüft den Referenzsolver lokal mit deutschen UI-Texten sowie Eingaben für Druckdifferenz, Rohrdurchmesser, Zeta-Werte und Gesamtvolumenstrom.
-- Der PR #15 ist als Draft gegen `feature/iterative-network-solver` geöffnet, damit der Referenzsolver vor einem Merge fachlich geprüft werden kann.
+- Der erste Solver-Core-Zwischenstand ist auf `main` integriert; die Windows-App wird zusätzlich über einen CI-Smoke-Test geprüft.
 
 ## Milestones
 
@@ -106,7 +106,8 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 | --- | --- |
 | `samples/FDS.WindowsApp` | Implementiert als WinForms-Test-Harness für den kleinen Referenzsolver mit deutschen UI- und Ergebnistexten. |
 | Eingaben | Druckdifferenz in Pa, Rohrdurchmesser in m, Zeta-Werte für zwei parallele Stränge und Gesamtvolumenstrom in m³/s. |
-| Ergebnisanzeige | Status, Iterationszahl, Knotenbilanz-Residual, Druck-Residual, Strang-Volumenströme und Druckresiduen. |
+| Szenario-Presets | Referenzfall, höhere Druckdifferenz und engeres Rohr als schnelle Vergleichsfälle. |
+| Ergebnisanzeige | Übersicht, Status, Iterationszahl, Knotenbilanz-Residual, Druck-Residual, Strang-Volumenströme, Druckresiduen, Iterationstabelle und Textausgabe. |
 | Smoke-Test | Implementiert über `FDS.WindowsApp.exe --smoke-test`; der Referenzfall konvergiert mit Residuen 0. |
 | Abgrenzung | Keine produktive UI und keine zusätzliche Solver-Logik in der App. |
 
