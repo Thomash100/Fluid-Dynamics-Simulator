@@ -22,6 +22,7 @@ public sealed class MainForm : Form
     private readonly DataGridView branchFlowGrid;
     private readonly DataGridView pressureResidualGrid;
     private readonly DataGridView iterationGrid;
+    private readonly DataGridView presetComparisonGrid;
     private readonly TextBox outputTextBox;
 
     public MainForm()
@@ -132,6 +133,13 @@ public sealed class MainForm : Form
             RunScenario();
         };
 
+        var compareButton = new Button
+        {
+            AutoSize = true,
+            Text = "Presets vergleichen",
+        };
+        compareButton.Click += (_, _) => RunPresetComparison();
+
         statusLabel = new Label
         {
             AutoSize = true,
@@ -141,6 +149,7 @@ public sealed class MainForm : Form
 
         commandPanel.Controls.Add(runButton);
         commandPanel.Controls.Add(resetButton);
+        commandPanel.Controls.Add(compareButton);
         commandPanel.Controls.Add(statusLabel);
 
         var topPanel = new TableLayoutPanel
@@ -178,6 +187,15 @@ public sealed class MainForm : Form
             ("Iteration", nameof(IterationReportRow.IterationNumberText), 110),
             ("Knotenbilanz-Residuum", nameof(IterationReportRow.NodeResidualText), 220),
             ("Druck-Residuum", nameof(IterationReportRow.PressureResidualText), 180));
+        presetComparisonGrid = CreateGrid(
+            ("Szenario", nameof(PresetComparisonReportRow.ScenarioName), 170),
+            ("Status", nameof(PresetComparisonReportRow.StatusText), 190),
+            ("Iterationen", nameof(PresetComparisonReportRow.IterationsText), 110),
+            ("Knotenbilanz", nameof(PresetComparisonReportRow.NodeResidualText), 160),
+            ("Druck", nameof(PresetComparisonReportRow.PressureResidualText), 140),
+            ("Strang A", nameof(PresetComparisonReportRow.BranchAFlowText), 140),
+            ("Strang B", nameof(PresetComparisonReportRow.BranchBFlowText), 140),
+            ("Bewertung", nameof(PresetComparisonReportRow.AssessmentText), 210));
         outputTextBox = CreateReadOnlyTextBox(wordWrap: false);
 
         var resultTabs = new TabControl
@@ -188,6 +206,7 @@ public sealed class MainForm : Form
         resultTabs.TabPages.Add(CreateGridTab("Stränge", branchFlowGrid));
         resultTabs.TabPages.Add(CreateGridTab("Druckresiduen", pressureResidualGrid));
         resultTabs.TabPages.Add(CreateGridTab("Iterationen", iterationGrid));
+        resultTabs.TabPages.Add(CreateGridTab("Preset-Vergleich", presetComparisonGrid));
         resultTabs.TabPages.Add(CreateTextTab("Textausgabe", outputTextBox));
 
         root.Controls.Add(headerLabel, 0, 0);
@@ -198,7 +217,11 @@ public sealed class MainForm : Form
 
         presetComboBox.SelectedIndex = 0;
         SetInputValues(SolverScenarioParameters.Default);
-        Load += (_, _) => RunScenario();
+        Load += (_, _) =>
+        {
+            RunScenario();
+            RunPresetComparison();
+        };
     }
 
     private void RunScenario()
@@ -236,6 +259,19 @@ public sealed class MainForm : Form
             pressureResidualGrid.DataSource = null;
             iterationGrid.DataSource = null;
             outputTextBox.Text = $"Fehler beim Ausführen des Solver-Tests:{Environment.NewLine}{ex}";
+        }
+    }
+
+    private void RunPresetComparison()
+    {
+        try
+        {
+            presetComparisonGrid.DataSource = SolverScenarioRunner.CreatePresetComparison().ToList();
+        }
+        catch (Exception ex)
+        {
+            presetComparisonGrid.DataSource = null;
+            outputTextBox.Text = $"Fehler beim Erstellen des Preset-Vergleichs:{Environment.NewLine}{ex}";
         }
     }
 

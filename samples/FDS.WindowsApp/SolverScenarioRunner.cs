@@ -163,6 +163,35 @@ internal static class SolverScenarioRunner
             iterationRows);
     }
 
+    public static IReadOnlyList<PresetComparisonReportRow> CreatePresetComparison()
+    {
+        return SolverScenarioPreset.All
+            .Select(CreatePresetComparisonRow)
+            .ToList();
+    }
+
+    public static string FormatPresetComparison(IReadOnlyList<PresetComparisonReportRow>? rows = null)
+    {
+        rows ??= CreatePresetComparison();
+
+        var builder = new StringBuilder();
+        builder.AppendLine("Preset-Vergleich:");
+
+        foreach (PresetComparisonReportRow row in rows)
+        {
+            builder.AppendLine(
+                $"- {row.ScenarioName}: Status {row.StatusText}, " +
+                $"Iterationen {row.IterationsText}, " +
+                $"Knotenbilanz {row.NodeResidualText}, " +
+                $"Druck {row.PressureResidualText}, " +
+                $"Strang A {row.BranchAFlowText}, " +
+                $"Strang B {row.BranchBFlowText}, " +
+                $"Bewertung {row.AssessmentText}");
+        }
+
+        return builder.ToString();
+    }
+
     public static string FormatStatus(HydraulicSolverStatus status)
     {
         return status switch
@@ -182,6 +211,30 @@ internal static class SolverScenarioRunner
             "branch-b" => "Strang B",
             _ => elementId,
         };
+    }
+
+    private static PresetComparisonReportRow CreatePresetComparisonRow(SolverScenarioPreset preset)
+    {
+        HydraulicSolverResult result = RunParallelBranchScenario(preset.Parameters);
+        SolverScenarioReport report = CreateReport(result, preset.Parameters);
+
+        return new PresetComparisonReportRow(
+            preset.Name,
+            report.StatusText,
+            report.IterationsText,
+            report.NodeResidualText,
+            report.PressureResidualText,
+            GetBranchFlow(report, "Strang A"),
+            GetBranchFlow(report, "Strang B"),
+            report.AssessmentText);
+    }
+
+    private static string GetBranchFlow(SolverScenarioReport report, string branchName)
+    {
+        return report.BranchFlows
+            .FirstOrDefault(row => row.BranchName == branchName)
+            ?.VolumeFlowRateText
+            ?? "-";
     }
 
     private static string FormatInputSummary(SolverScenarioParameters parameters)

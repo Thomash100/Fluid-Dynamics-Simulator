@@ -101,3 +101,42 @@ internal sealed class IterationReportRow
 
     public string PressureResidualText { get; }
 }
+
+internal sealed class PresetComparisonReportRow
+{
+    public PresetComparisonReportRow(
+        string scenarioName,
+        string statusText,
+        string iterationsText,
+        string nodeResidualText,
+        string pressureResidualText,
+        string branchAFlowText,
+        string branchBFlowText,
+        string assessmentText)
+    {
+        ScenarioName = scenarioName;
+        StatusText = statusText;
+        IterationsText = iterationsText;
+        NodeResidualText = nodeResidualText;
+        PressureResidualText = pressureResidualText;
+        BranchAFlowText = branchAFlowText;
+        BranchBFlowText = branchBFlowText;
+        AssessmentText = assessmentText;
+    }
+
+    public string ScenarioName { get; }
+
+    public string StatusText { get; }
+
+    public string IterationsText { get; }
+
+    public string NodeResidualText { get; }
+
+    public string PressureResidualText { get; }
+
+    public string BranchAFlowText { get; }
+
+    public string BranchBFlowText { get; }
+
+    public string AssessmentText { get; }
+}

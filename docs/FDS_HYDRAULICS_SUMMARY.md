@@ -62,7 +62,7 @@ Die Solution `FluidDynamicsSimulator.sln` enthält jetzt:
 - Iterationssnapshot `HydraulicSolverIteration`
 - Kleiner Referenzsolver `SmallHydraulicNetworkSolver`
 - Status `MaxIterationsReached`
-- Konfigurierbare WinForms-Test-App für den Referenzsolver mit deutschen UI- und Ergebnistexten, Presets, Prüfhinweisen und strukturierten Ergebnis-Tabs
+- Konfigurierbare WinForms-Test-App für den Referenzsolver mit deutschen UI- und Ergebnistexten, Presets, Preset-Vergleich, Prüfhinweisen und strukturierten Ergebnis-Tabs
 - Smoke-Test-Modus der Windows-App über `--smoke-test`
 - Unit Tests für Rohrmodell, Einzelwiderstände, Ventile, Pumpen, Strangberechnung, Netzwerkauswertung, Solver-Vorbereitung und kleinen Referenzsolver
 
