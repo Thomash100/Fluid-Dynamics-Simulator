@@ -107,7 +107,7 @@ Fluid Dynamics Simulator (FDS) ist eine Open-Source-Simulationsplattform für te
 | `samples/FDS.WindowsApp` | Implementiert als WinForms-Test-Harness für den kleinen Referenzsolver mit deutschen UI- und Ergebnistexten. |
 | Eingaben | Druckdifferenz in Pa, Rohrdurchmesser in m, Zeta-Werte für zwei parallele Stränge und Gesamtvolumenstrom in m³/s. |
 | Szenario-Presets | Referenzfall, höhere Druckdifferenz und engeres Rohr als schnelle Vergleichsfälle. |
-| Ergebnisanzeige | Übersicht, Status, Iterationszahl, Knotenbilanz-Residual, Druck-Residual, Strang-Volumenströme, Druckresiduen, Iterationstabelle und Textausgabe. |
+| Ergebnisanzeige | Übersicht, Status, Iterationszahl, Knotenbilanz-Residual, Druck-Residual, Ergebnisbewertung, Prüfhinweise, Strang-Volumenströme, Druckresiduen, Iterationstabelle und Textausgabe. |
 | Smoke-Test | Implementiert über `FDS.WindowsApp.exe --smoke-test`; der Referenzfall konvergiert mit Residuen 0. |
 | Abgrenzung | Keine produktive UI und keine zusätzliche Solver-Logik in der App. |
 

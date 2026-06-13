@@ -81,6 +81,14 @@ internal static class SolverScenarioRunner
         builder.AppendLine($"Iterationen: {report.IterationsText}");
         builder.AppendLine($"Finales Knotenbilanz-Residuum: {report.NodeResidualText}");
         builder.AppendLine($"Finales Druck-Residuum: {report.PressureResidualText}");
+        builder.AppendLine($"Bewertung: {report.AssessmentText}");
+        if (!string.IsNullOrWhiteSpace(report.ReviewSummaryText))
+        {
+            builder.AppendLine();
+            builder.AppendLine("Prüfhinweise:");
+            builder.AppendLine(report.ReviewSummaryText);
+        }
+
         builder.AppendLine();
 
         builder.AppendLine("Strang-Volumenströme:");
@@ -145,7 +153,11 @@ internal static class SolverScenarioRunner
             result.Iterations.ToString(CultureInfo.InvariantCulture),
             FormatVolumeFlow(result.MaxNodeBalanceResidualCubicMetersPerSecond),
             FormatPressure(result.MaxPressureResidualPascals),
+            SolverScenarioReview.CreateAssessment(result),
             parameters is null ? string.Empty : FormatInputSummary(parameters),
+            parameters is null
+                ? string.Empty
+                : string.Join(Environment.NewLine, SolverScenarioReview.CreateMessages(parameters, result)),
             branchRows,
             residualRows,
             iterationRows);

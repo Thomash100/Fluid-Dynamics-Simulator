@@ -16,7 +16,9 @@ public sealed class MainForm : Form
     private readonly Label iterationsValueLabel;
     private readonly Label nodeResidualValueLabel;
     private readonly Label pressureResidualValueLabel;
+    private readonly Label assessmentValueLabel;
     private readonly TextBox inputSummaryTextBox;
+    private readonly TextBox reviewSummaryTextBox;
     private readonly DataGridView branchFlowGrid;
     private readonly DataGridView pressureResidualGrid;
     private readonly DataGridView iterationGrid;
@@ -158,8 +160,11 @@ public sealed class MainForm : Form
         iterationsValueLabel = CreateValueLabel();
         nodeResidualValueLabel = CreateValueLabel();
         pressureResidualValueLabel = CreateValueLabel();
+        assessmentValueLabel = CreateValueLabel();
         inputSummaryTextBox = CreateReadOnlyTextBox(wordWrap: false);
         inputSummaryTextBox.Height = 130;
+        reviewSummaryTextBox = CreateReadOnlyTextBox(wordWrap: true);
+        reviewSummaryTextBox.Height = 150;
 
         branchFlowGrid = CreateGrid(
             ("Strang", nameof(BranchFlowReportRow.BranchName), 160),
@@ -209,7 +214,9 @@ public sealed class MainForm : Form
             iterationsValueLabel.Text = report.IterationsText;
             nodeResidualValueLabel.Text = report.NodeResidualText;
             pressureResidualValueLabel.Text = report.PressureResidualText;
+            assessmentValueLabel.Text = report.AssessmentText;
             inputSummaryTextBox.Text = report.InputSummaryText;
+            reviewSummaryTextBox.Text = report.ReviewSummaryText;
             branchFlowGrid.DataSource = report.BranchFlows.ToList();
             pressureResidualGrid.DataSource = report.PressureResiduals.ToList();
             iterationGrid.DataSource = report.Iterations.ToList();
@@ -222,7 +229,9 @@ public sealed class MainForm : Form
             iterationsValueLabel.Text = "-";
             nodeResidualValueLabel.Text = "-";
             pressureResidualValueLabel.Text = "-";
+            assessmentValueLabel.Text = "-";
             inputSummaryTextBox.Clear();
+            reviewSummaryTextBox.Clear();
             branchFlowGrid.DataSource = null;
             pressureResidualGrid.DataSource = null;
             iterationGrid.DataSource = null;
@@ -283,7 +292,9 @@ public sealed class MainForm : Form
         AddSummaryRow(panel, 1, "Iterationen", iterationsValueLabel);
         AddSummaryRow(panel, 2, "Knotenbilanz-Residuum", nodeResidualValueLabel);
         AddSummaryRow(panel, 3, "Druck-Residuum", pressureResidualValueLabel);
-        AddSummaryRow(panel, 4, "Eingaben", inputSummaryTextBox);
+        AddSummaryRow(panel, 4, "Bewertung", assessmentValueLabel);
+        AddSummaryRow(panel, 5, "Eingaben", inputSummaryTextBox);
+        AddSummaryRow(panel, 6, "Prüfhinweise", reviewSummaryTextBox);
 
         page.Controls.Add(panel);
         return page;

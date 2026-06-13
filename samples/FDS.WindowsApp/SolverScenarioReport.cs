@@ -7,7 +7,9 @@ internal sealed class SolverScenarioReport
         string iterationsText,
         string nodeResidualText,
         string pressureResidualText,
+        string assessmentText,
         string inputSummaryText,
+        string reviewSummaryText,
         IReadOnlyList<BranchFlowReportRow> branchFlows,
         IReadOnlyList<PressureResidualReportRow> pressureResiduals,
         IReadOnlyList<IterationReportRow> iterations)
@@ -16,7 +18,9 @@ internal sealed class SolverScenarioReport
         IterationsText = iterationsText;
         NodeResidualText = nodeResidualText;
         PressureResidualText = pressureResidualText;
+        AssessmentText = assessmentText;
         InputSummaryText = inputSummaryText;
+        ReviewSummaryText = reviewSummaryText;
         BranchFlows = branchFlows;
         PressureResiduals = pressureResiduals;
         Iterations = iterations;
@@ -30,7 +34,11 @@ internal sealed class SolverScenarioReport
 
     public string PressureResidualText { get; }
 
+    public string AssessmentText { get; }
+
     public string InputSummaryText { get; }
+
+    public string ReviewSummaryText { get; }
 
     public IReadOnlyList<BranchFlowReportRow> BranchFlows { get; }
 
