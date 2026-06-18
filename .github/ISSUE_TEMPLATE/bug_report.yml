@@ -1,0 +1,50 @@
+name: Bug Report
+description: Fehler im Fluid Dynamics Simulator melden
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bitte beschreibe den Fehler so, dass er lokal oder in CI reproduzierbar ist.
+  - type: input
+    id: area
+    attributes:
+      label: Bereich
+      description: Beispiel: FDS.Core, FDS.Hydraulics, Windows-App, CI
+      placeholder: FDS.Hydraulics
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Aktuelles Verhalten
+      description: Was passiert?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Erwartetes Verhalten
+      description: Was sollte passieren?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduktion
+      description: Befehle, Eingabedaten oder Testfall.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Pruefungen
+      description: Welche lokalen Checks oder CI-Jobs sind betroffen?
+      placeholder: dotnet test FluidDynamicsSimulator.sln --configuration Release
+

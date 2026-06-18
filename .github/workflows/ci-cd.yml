@@ -37,6 +37,9 @@ jobs:
       - name: Test
         run: dotnet test FluidDynamicsSimulator.sln --configuration Release --no-build --verbosity normal
 
+      - name: Format
+        run: dotnet format FluidDynamicsSimulator.sln --verify-no-changes --verbosity minimal
+
       - name: Create artifact
         run: |
           mkdir -p artifact/project

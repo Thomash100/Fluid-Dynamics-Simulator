@@ -1,0 +1,56 @@
+name: Codex Task
+description: Abgegrenzten Arbeitsauftrag fuer Codex vorbereiten
+title: "[Codex]: "
+labels:
+  - codex
+body:
+  - type: input
+    id: branch
+    attributes:
+      label: Zielbranch
+      description: Gewuenschter Branchname oder Basisbranch.
+      placeholder: feature/<scope>
+    validations:
+      required: true
+  - type: textarea
+    id: task
+    attributes:
+      label: Aufgabe
+      description: Was soll Codex umsetzen?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Umfang
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: non_scope
+    attributes:
+      label: Nicht umsetzen
+      placeholder: |
+        - keine neue Solverlogik
+        - keine UI
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Pruefungen
+      value: |
+        - dotnet restore FluidDynamicsSimulator.sln
+        - dotnet build FluidDynamicsSimulator.sln --configuration Release
+        - dotnet test FluidDynamicsSimulator.sln --configuration Release
+        - dotnet format FluidDynamicsSimulator.sln --verify-no-changes --verbosity minimal
+        - dotnet run --project samples/FDS.WindowsApp/FDS.WindowsApp.csproj --configuration Release -- --smoke-test
+  - type: textarea
+    id: stop
+    attributes:
+      label: Manueller Stopppunkt
+      description: Wann soll Codex stoppen?
+
