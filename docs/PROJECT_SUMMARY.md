@@ -1,6 +1,6 @@
 # Projektzusammenfassung
 
-Stand: 2026-06-18
+Stand: 2026-06-19
 
 Repository: https://github.com/Thomash100/Fluid-Dynamics-Simulator
 
@@ -70,26 +70,42 @@ GitHub Actions enthalten Restore, Build, Test, Formatcheck, Windows-App-Smoke-Te
 
 ## Issue- und Roadmap-Abgleich
 
-Die offenen GitHub-Issues wurden gegen den aktuellen Stand geprueft. Es wurden keine Issues automatisch geschlossen.
+Die Issue-Bereinigung nach PR #18 wurde am 2026-06-19 durchgefuehrt und in `docs/ISSUE_REVIEW_2026-06.md` dokumentiert.
 
-| Issue | Bewertung | Empfehlung |
+Geschlossene Alt-Issues:
+
+- #2 Repository-Grundstruktur erstellen
+- #3 Solution und Projekte anlegen
+- #4 Fluid-Klasse entwickeln
+- #5 Netzwerkmodell entwickeln
+- #6 Hydraulik-Solver entwickeln
+- #7 Pumpenmodell entwickeln
+- #8 Armaturenmodell entwickeln
+- #10 Ergebnisvisualisierung entwickeln
+- #13 Beispielprojekte erstellen
+- #14 Iterative hydraulic network solver
+
+Bewusst offene Roadmap-Issues:
+
+- #1 Rollout SYSTEMMEDIA-DevOps Standard
+- #9 Thermisches Modell entwickeln
+- #11 IFC-Schnittstelle entwickeln
+- #12 Revit-Schnittstelle entwickeln
+
+Neue Folge-Issues fuer `v0.3.0-hydraulics`:
+
+| Issue | Titel | Zweck |
 | --- | --- | --- |
-| #1 Rollout SYSTEMMEDIA-DevOps Standard | teilweise adressiert | Nach Merge dieses PR manuell pruefen. |
-| #2 Repository-Grundstruktur erstellen | vermutlich erledigt | Manuell schliessen, falls kein Project-Board-Punkt offen bleibt. |
-| #3 Solution und Projekte anlegen | vermutlich erledigt | Manuell schliessen. |
-| #4 Fluid-Klasse entwickeln | erledigt | Manuell schliessen. |
-| #5 Netzwerkmodell entwickeln | erledigt | Manuell schliessen. |
-| #6 Hydraulik-Solver entwickeln | zu breit | In Komponentenstand, Referenzsolver und allgemeinen Solver aufteilen. |
-| #7 Pumpenmodell entwickeln | Basis erledigt | Betriebspunkt und Pumpenauswahl separat schneiden. |
-| #8 Armaturenmodell entwickeln | Basis erledigt | Regelventil-Auslegung separat schneiden. |
-| #9 Thermisches Modell entwickeln | offen | Spaeterer eigener Scope. |
-| #10 Ergebnisvisualisierung entwickeln | teilweise offen | Windows-App ist nur Test-Harness, produktive Visualisierung separat planen. |
-| #11 IFC-Schnittstelle entwickeln | offen | Noch nicht starten. |
-| #12 Revit-Schnittstelle entwickeln | offen | Noch nicht starten. |
-| #13 Beispielprojekte erstellen | teilweise offen | Fachliche Beispielnetze und Testdaten separat ausbauen. |
-| #14 Iterative hydraulic network solver | teilweise erledigt | Referenzsolver ist vorhanden; allgemeiner Netzwerksolver bleibt offen oder wird neu geschnitten. |
+| #19 | Solver-Validierungsnetze und Referenzfaelle ergaenzen | Naechster fachlicher Fokus fuer validierte hydraulische Referenznetze. |
+| #20 | Hydraulischen Betriebspunkt fuer einfache Strangnetze validieren | Betriebspunktbegriff klaeren, ohne allgemeinen Netzsolver. |
+| #21 | Pumpenkennlinien und Betriebspunktlogik spezifizieren | Pumpen-Folgearbeit fachlich vorbereiten. |
+| #22 | Ventil-/Armaturenkennwerte fuer spaetere Regulierlogik vorbereiten | Armaturen- und Ventil-Folgearbeit fachlich vorbereiten. |
+| #23 | Ergebnisvisualisierung fuer Solver- und Referenzfaelle vorbereiten | Ergebnisdarstellung vorbereiten, ohne produktive UI. |
+| #24 | Beispielnetze und Beispielprojekte fuer v0.3.0-hydraulics definieren | Beispielnetze und Testdaten fuer die Hydraulikphase strukturieren. |
 
 ## Naechster sinnvoller fachlicher Schritt
+
+Naechster fachlicher Codex-Auftrag: #19 `Solver-Validierungsnetze und Referenzfaelle ergaenzen`.
 
 Vor einem allgemeinen Newton-, Hardy-Cross- oder Gradient-Solver sollten weitere hydraulische Referenznetze mit erwarteten Residuen und Grenzfaellen dokumentiert und getestet werden.
 
