@@ -4,87 +4,72 @@ Stand: 2026-06-19
 
 Basis:
 
-- `main` nach Merge von PR #18.
+- PR #18 wurde nach `main` gemergt.
 - Merge-Commit: `651d36c Merge PR #18 project governance and architecture docs`.
-- Governance-Dokumente, Architekturleitplanken, Issue-Templates, PR-Template, .NET-8-SDK-Pin, EditorConfig, Directory.Build.props und CI-Formatcheck sind auf `main`.
-- Es wurden keine Issues automatisch geschlossen.
+- Dokumentationscommit: `8ec1178 Add governance issue review`.
+- Issue-Bereinigung wurde am 2026-06-19 ueber GitHub Issues durchgefuehrt.
+- Es wurden keine fachlichen Solverfunktionen umgesetzt.
 
-## Bewertungsgrundsatz
+## Ergebnis
 
-Diese Datei ist eine Entscheidungsvorlage. Sie unterscheidet zwischen bereits umgesetztem Stand, weiter offenem Scope und empfohlenem Zuschnitt fuer Folge-Issues.
+Die Alt-Issues #1 bis #14 wurden gegen den aktuellen `main`-Stand und die Governance-Dokumentation bewertet.
 
-Issue-Schliessungen wurden bewusst nicht automatisch ausgefuehrt, obwohl GitHub API-Zugriff vorhanden ist. Grund: Mehrere Alt-Issues sind mit Milestones, Roadmap und teils breiten Titeln verbunden. Die endgueltige Bereinigung sollte manuell erfolgen, damit Milestones und Folge-Issues konsistent bleiben.
+- Geschlossen als erledigt: #2, #3, #4, #5.
+- Geschlossen mit engerem Folge-Issue: #6, #7, #8, #10, #13, #14.
+- Bewusst offen gelassen: #1, #9, #11, #12.
+- Neue Folge-Issues angelegt: #19, #20, #21, #22, #23, #24.
 
-## Issue-Bewertung
+## Geschlossene Alt-Issues
 
-| Issue | Titel | Aktueller Umsetzungsstand | Empfehlung | Begruendung | Moegliches Folge-Issue |
-| --- | --- | --- | --- | --- | --- |
-| #1 | Rollout: SYSTEMMEDIA-DevOps Standard fuer Fluid-Dynamics-Simulator uebernehmen | Teilweise umgesetzt durch PR #18: Governance-Dokumente, Templates, Formatcheck und Architekturleitplanken sind vorhanden. | Offen lassen oder nach manueller Checkliste schliessen. | Der genaue SYSTEMMEDIA-DevOps-Standard ist nicht vollstaendig als Akzeptanzkriterium im Repository abgebildet. | DevOps-Standard gegen externe Checkliste final abgleichen. |
-| #2 | Repository-Grundstruktur erstellen | Erledigt. Repository-Struktur, README, Docs, CI, Templates und Governance-Grundlagen sind vorhanden. | Schliessen. | Der urspruengliche Basisumfang ist auf `main` umgesetzt. | Kein Folge-Issue erforderlich; Project-Board separat klaeren, falls weiterhin gewuenscht. |
-| #3 | Solution und Projekte anlegen | Erledigt. `FluidDynamicsSimulator.sln` enthaelt `FDS.Core`, `FDS.Hydraulics`, Tests und Windows-Test-Harness. | Schliessen. | Solution- und Projektgrundlage ist vorhanden und CI-geprueft. | Neue Fachmodule jeweils als eigene Issues schneiden. |
-| #4 | Fluid-Klasse entwickeln | Erledigt. `Fluid` ist in `FDS.Core` implementiert und getestet. | Schliessen. | Basismodell und Validierungen sind vorhanden. | Spaetere Stoffdatenbank oder temperaturabhaengige Eigenschaften separat schneiden. |
-| #5 | Netzwerkmodell entwickeln | Erledigt. `Node`, `Edge`, `Network` und Topologievalidierungen sind implementiert und getestet. | Schliessen. | Core-Netzwerkmodell ist vorhanden. | Erweiterte Graph-/Topologieanalyse separat schneiden. |
-| #6 | Hydraulik-Solver entwickeln | Zu breit und teilweise umgesetzt. Komponenten, Strang, feste Netzwerkauswertung, Residuen und kleiner Referenzsolver existieren; allgemeiner Netzwerksolver fehlt bewusst. | Neu schneiden. | Ein einziges Issue vermischt Komponentenmodelle, Referenzsolver und allgemeinen Solver. | Solver-Validierungsnetze und Referenzfaelle ergaenzen; spaeter allgemeine Solvervariante spezifizieren. |
-| #7 | Pumpenmodell entwickeln | Basis erledigt. `Pump`, `PumpCurve`, Interpolation, Druckerhoehung und Leistung sind implementiert. | Schliessen und Folge-Issue anlegen. | Das Grundmodell ist erledigt; Betriebspunktlogik ist bewusst nicht enthalten. | Pumpenkennlinien und Betriebspunktlogik spezifizieren. |
-| #8 | Armaturenmodell entwickeln | Basis erledigt. `LocalResistance`, `Fitting`, `Valve`, Zeta und Kv/Kvs sind implementiert. | Schliessen und Folge-Issue anlegen. | Grundmodelle sind erledigt; Regulierlogik und Ventilauslegung fehlen bewusst. | Ventil-/Armaturenkennwerte fuer spaetere Regulierlogik vorbereiten. |
-| #9 | Thermisches Modell entwickeln | Offen. Es existiert noch kein `FDS.Thermal`. | Offen lassen. | Thermik ist ein spaeteres Modul und nicht Teil des aktuellen Hydraulik-/Governance-Scopes. | FDS.Thermal Grundmodell schneiden, wenn Hydraulik-Validierung stabil ist. |
-| #10 | Ergebnisvisualisierung entwickeln | Teilweise offen. Die WinForms-App ist nur Test-Harness und keine produktive Visualisierung. | Neu schneiden oder offen lassen. | Der bestehende Sample deckt nur lokale Solverpruefung ab. | Ergebnisvisualisierung fuer Referenzfaelle spezifizieren. |
-| #11 | IFC-Schnittstelle entwickeln | Offen. Es existiert noch kein `FDS.Ifc`. | Offen lassen. | BIM-/IFC-Anbindung ist bewusst nicht gestartet. | IFC-Domaenenmodell und Importgrenzen vorbereiten. |
-| #12 | Revit-Schnittstelle entwickeln | Offen. Es existiert noch kein `FDS.Revit`. | Offen lassen. | Revit-Anbindung haengt von stabilem Austauschmodell ab. | Revit-Adapter-Scope nach IFC-/JSON-Modell schneiden. |
-| #13 | Beispielprojekte erstellen | Teilweise umgesetzt. `samples/FDS.WindowsApp` und Smoke-Test existieren; fachliche Beispielnetze fehlen. | Neu schneiden. | Das Sample ist ein Test-Harness, kein kuratierter Satz fachlicher Beispiele. | Solver-Validierungsnetze und Referenzfaelle ergaenzen. |
-| #14 | Iterative hydraulic network solver | Teilweise umgesetzt. Der kleine Referenzsolver ist auf `main`; ein allgemeiner Netzwerksolver fehlt bewusst. | Offen lassen oder neu schneiden. | Der aktuelle Solver ist absichtlich begrenzt. Das Issue sollte nicht als allgemeiner Solverabschluss gewertet werden. | Allgemeiner hydraulischer Netzwerksolver nach Referenzfall-Validierung. |
+| Issue | Titel | Aktion | Begruendung | Folge-Issue |
+| --- | --- | --- | --- | --- |
+| #2 | Repository-Grundstruktur erstellen | Geschlossen | Repository-Grundstruktur, Dokumentation, CI, Templates und Governance-Grundlagen sind auf `main`. | Kein Folge-Issue |
+| #3 | Solution und Projekte anlegen | Geschlossen | Solution enthaelt Core, Hydraulics, Tests und Windows-Test-Harness. | Neue Fachmodule bei Bedarf separat |
+| #4 | Fluid-Klasse entwickeln | Geschlossen | `Fluid` ist in `FDS.Core` implementiert und getestet. | Spaetere Stoffdaten separat |
+| #5 | Netzwerkmodell entwickeln | Geschlossen | `Node`, `Edge`, `Network` und Topologievalidierung sind implementiert und getestet. | Erweiterte Topologieanalyse separat |
+| #6 | Hydraulik-Solver entwickeln | Geschlossen | Breiter Alt-Scope wurde in kleinere Folge-Issues geschnitten. | #19, #20 |
+| #7 | Pumpenmodell entwickeln | Geschlossen | Pumpen-Basismodell ist vorhanden; weiterfuehrende Betriebspunktlogik wurde separiert. | #21 |
+| #8 | Armaturenmodell entwickeln | Geschlossen | LocalResistance, Fitting, Valve, Zeta und Kv/Kvs sind vorhanden; Regulierlogik wurde separiert. | #22 |
+| #10 | Ergebnisvisualisierung entwickeln | Geschlossen | Breiter Visualisierungs-Scope wurde auf Solver- und Referenzfaelle eingegrenzt. | #23 |
+| #13 | Beispielprojekte erstellen | Geschlossen | Breiter Beispiel-Scope wurde auf Hydraulik-Beispielnetze und Referenzfaelle geschnitten. | #19, #24 |
+| #14 | Iterative hydraulic network solver | Geschlossen | Der kleine Referenzsolver ist vorhanden; weitere Arbeit wurde auf Validierung und Betriebspunktdefinition eingegrenzt. | #19, #20 |
 
-## Empfohlene direkte Issue-Aktionen
+Alle geschlossenen Issues wurden vor dem Schliessen kommentiert.
 
-Sicher schliessbar nach manueller Bestaetigung:
+## Bewusst offene Issues
 
-- #2 Repository-Grundstruktur erstellen
-- #3 Solution und Projekte anlegen
-- #4 Fluid-Klasse entwickeln
-- #5 Netzwerkmodell entwickeln
+| Issue | Titel | Status | Begruendung |
+| --- | --- | --- | --- |
+| #1 | Rollout: SYSTEMMEDIA-DevOps Standard fuer Fluid-Dynamics-Simulator uebernehmen | Offen | Bleibt offen, bis eine konkrete externe DevOps-Checkliste final abgeglichen ist. |
+| #9 | Thermisches Modell entwickeln | Offen | `FDS.Thermal` ist ein spaeterer Roadmap-Punkt. |
+| #11 | IFC-Schnittstelle entwickeln | Offen | IFC/BIM-Anbindung ist ein spaeterer Roadmap-Punkt. |
+| #12 | Revit-Schnittstelle entwickeln | Offen | Revit-Anbindung haengt von einem stabilen Austauschmodell ab. |
 
-Schliessbar mit Folge-Issue:
+Diese Issues wurden kommentiert und bewusst offen gelassen.
 
-- #7 Pumpenmodell entwickeln
-- #8 Armaturenmodell entwickeln
+## Neue Folge-Issues
 
-Neu schneiden statt pauschal schliessen:
+| Issue | Titel | Milestone | Zweck |
+| --- | --- | --- | --- |
+| #19 | Solver-Validierungsnetze und Referenzfaelle ergaenzen | `v0.3.0-hydraulics` | Naechster fachlicher Fokus fuer validierte Referenznetze, Residuen und Grenzfaelle. |
+| #20 | Hydraulischen Betriebspunkt fuer einfache Strangnetze validieren | `v0.3.0-hydraulics` | Betriebspunktbegriff fuer einfache Strangnetze klaeren, ohne allgemeinen Netzsolver. |
+| #21 | Pumpenkennlinien und Betriebspunktlogik spezifizieren | `v0.3.0-hydraulics` | Pumpenmodell fachlich fuer spaetere Betriebspunktlogik vorbereiten. |
+| #22 | Ventil-/Armaturenkennwerte fuer spaetere Regulierlogik vorbereiten | `v0.3.0-hydraulics` | Zeta-, Kv- und Kvs-Konventionen fuer spaetere Regulierlogik konsolidieren. |
+| #23 | Ergebnisvisualisierung fuer Solver- und Referenzfaelle vorbereiten | `v0.3.0-hydraulics` | Ergebnisdarstellung vorbereiten, ohne produktive UI einzufuehren. |
+| #24 | Beispielnetze und Beispielprojekte fuer v0.3.0-hydraulics definieren | `v0.3.0-hydraulics` | Beispielnetze, Testdaten und Beispielprojekte fuer den Hydraulikstand definieren. |
 
-- #6 Hydraulik-Solver entwickeln
-- #10 Ergebnisvisualisierung entwickeln
-- #13 Beispielprojekte erstellen
-- #14 Iterative hydraulic network solver
+## Aktuelle Roadmap-Lage
 
-Offen lassen:
+Der aktive fachliche Fokus fuer die naechste Entwicklungsphase liegt auf `v0.3.0-hydraulics`.
 
-- #1 DevOps-Standard, bis externe Kriterien final abgeglichen sind
-- #9 Thermisches Modell entwickeln
-- #11 IFC-Schnittstelle entwickeln
-- #12 Revit-Schnittstelle entwickeln
+Prioritaet:
 
-## Vorgeschlagene Folge-Issues
+1. #19 Solver-Validierungsnetze und Referenzfaelle ergaenzen.
+2. #20 Hydraulischen Betriebspunkt fuer einfache Strangnetze validieren.
+3. #21 und #22 Pumpen- und Armaturen-Folgearbeit fachlich vorbereiten.
+4. #23 und #24 Ergebnisdarstellung und Beispielnetze fuer die Hydraulikphase strukturieren.
 
-1. Solver-Validierungsnetze und Referenzfaelle ergaenzen
-   - Kleine Einstrang-, Parallelstrang- und Pumpendruck-Netze definieren.
-   - Erwartete Knotenbilanz- und Druckresiduen dokumentieren.
-   - Grenzfaelle fuer `InvalidInput` und `MaxIterationsReached` absichern.
-
-2. Hydraulischen Betriebspunkt fuer einfache Strangnetze validieren
-   - Betriebspunktbegriff fuer feste Druckdifferenz und feste Pumpendruckerhoehung klaeren.
-   - Keine allgemeine Netziteration in diesem Schritt.
-
-3. Pumpenkennlinien und Betriebspunktlogik spezifizieren
-   - Erwartetes Verhalten bei Kennliniengrenzen, Interpolation und fehlender Konvergenz beschreiben.
-   - Automatische Pumpenauswahl weiterhin ausschliessen.
-
-4. Ventil-/Armaturenkennwerte fuer spaetere Regulierlogik vorbereiten
-   - Zeta-, Kv- und Kvs-Konventionen konsolidieren.
-   - Regelventil-Auslegung bewusst als spaeteren Schritt belassen.
-
-5. Roadmap `v0.3.0-hydraulics` nach Governance-Review aktualisieren
-   - Milestone-Zuordnung und Issue-Zuschnitt an den aktuellen Implementierungsstand anpassen.
-
-## Naechster fachlicher Codex-Auftrag
+## Naechster Codex-Auftrag
 
 Empfohlen:
 
@@ -94,12 +79,8 @@ Repository: Thomash100/Fluid-Dynamics-Simulator
 Aufgabe:
 Ergaenze Solver-Validierungsnetze und Referenzfaelle fuer FDS.Hydraulics, ohne neue Solverlogik.
 
-Scope:
-- Kleine hydraulische Referenznetze als Testdaten oder Test-Helper definieren.
-- Erwartete Knotenbilanz- und Druckresiduen dokumentieren.
-- Tests fuer Einstrang, parallele Straenge, bekannte Druckdifferenz und feste Pumpendruckerhoehung ergaenzen.
-- `InvalidInput` und `MaxIterationsReached` als Grenzfaelle absichern.
-- Dokumentation aktualisieren.
+Issue:
+#19 Solver-Validierungsnetze und Referenzfaelle ergaenzen
 
 Nicht umsetzen:
 - kein Newton-Solver
