@@ -130,6 +130,7 @@ samples/
 - `HydraulicSolverInput`: Eingabeobjekt für vorbereitete kleine Netze, Randbedingungen und Startwerte.
 - `HydraulicSolverIteration`: dokumentiert Flüsse und Residuen je Iteration.
 - `SmallHydraulicNetworkSolver`: einfacher Relaxationssolver für kleine Referenznetze.
+- Solver-Referenzfälle mit erwarteten Knotenbilanz- und Druckresiduen sind in `docs/SOLVER_VALIDATION.md` und im Testprojekt `FDS.Hydraulics.Tests` dokumentiert.
 
 ## Einheiten
 
