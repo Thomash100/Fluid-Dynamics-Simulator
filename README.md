@@ -20,6 +20,24 @@ Die erste Grundstruktur für `FDS.Core` ist vorhanden. Sie enthält Basismodelle
 
 Unter `samples/FDS.WindowsApp` liegt eine kleine WinForms-Test-App für den Referenzsolver. Sie dient nur als konfigurierbares Test-Harness, ist keine produktive Oberfläche und verwendet derzeit deutsche UI-Texte. Die App enthält Presets, einen Preset-Vergleich, strukturierte Ergebnis-Tabs, eine Ergebnisbewertung, Prüfhinweise, Tabellen für Strang-Volumenströme, Druckresiduen und Iterationen sowie weiterhin eine Textausgabe für Smoke-Tests und Debugging. Die Eingabe- und Ergebniseinheiten können im Menü `Einstellungen` → `Einheiten` für Druck, Länge/Durchmesser und Volumenstrom umgeschaltet werden; intern bleiben Solver und Modellfelder in SI-Einheiten.
 
+## Projektstandard
+
+Das Repository ist aktuell als modularer Monolith in einer .NET-Solution aufgebaut. `FDS.Core` und `FDS.Hydraulics` sind Fachbibliotheken; spätere Module wie `FDS.Thermal`, `FDS.Airflow`, `FDS.Ifc` und `FDS.Revit` sollen im selben Repository als weitere Projekte entstehen.
+
+Die technischen Namespaces `FDS.*` bleiben vorerst bestehen. In externer Kommunikation wird der volle Name `Fluid Dynamics Simulator` verwendet, um Verwechslungen mit Fire Dynamics Simulator zu vermeiden.
+
+Weitere Projektregeln und Architekturleitplanken:
+
+- `AGENTS.md`
+- `docs/PROJECT_RULES.md`
+- `docs/CODEX_WORKFLOW.md`
+- `docs/ARCHITECTURE_DECISIONS.md`
+- `docs/TECHNICAL_DEBT.md`
+- `docs/TESTING.md`
+- `docs/RELEASE_PROCESS.md`
+- `docs/SOLVER_VALIDATION.md`
+- `docs/UNITS_AND_ASSUMPTIONS.md`
+
 ## Projektstruktur
 
 ```text
@@ -112,6 +130,7 @@ samples/
 - `HydraulicSolverInput`: Eingabeobjekt für vorbereitete kleine Netze, Randbedingungen und Startwerte.
 - `HydraulicSolverIteration`: dokumentiert Flüsse und Residuen je Iteration.
 - `SmallHydraulicNetworkSolver`: einfacher Relaxationssolver für kleine Referenznetze.
+- Solver-Referenzfälle mit erwarteten Knotenbilanz- und Druckresiduen sind in `docs/SOLVER_VALIDATION.md` und im Testprojekt `FDS.Hydraulics.Tests` dokumentiert.
 
 ## Einheiten
 
@@ -218,8 +237,10 @@ IFC- und Revit-Schnittstellen
 
 ```bash
 dotnet restore FluidDynamicsSimulator.sln
-dotnet build FluidDynamicsSimulator.sln
-dotnet test FluidDynamicsSimulator.sln
+dotnet build FluidDynamicsSimulator.sln --configuration Release
+dotnet test FluidDynamicsSimulator.sln --configuration Release
+dotnet format FluidDynamicsSimulator.sln --verify-no-changes --verbosity minimal
+dotnet run --project samples/FDS.WindowsApp/FDS.WindowsApp.csproj --configuration Release -- --smoke-test
 ```
 
 ## Lizenz

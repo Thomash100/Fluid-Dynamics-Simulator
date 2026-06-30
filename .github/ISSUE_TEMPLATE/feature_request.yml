@@ -1,0 +1,47 @@
+name: Feature Request
+description: Neue Funktion oder fachlichen Ausbau vorschlagen
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: input
+    id: area
+    attributes:
+      label: Bereich
+      description: Beispiel: Core, Hydraulics, Thermal, Airflow, IFC, Revit, Windows-App
+      placeholder: Hydraulics
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Ziel
+      description: Welches fachliche oder technische Ziel soll erreicht werden?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Umfang
+      description: Was soll umgesetzt werden?
+      placeholder: |
+        - ...
+        - ...
+    validations:
+      required: true
+  - type: textarea
+    id: non_scope
+    attributes:
+      label: Nicht im Scope
+      description: Was soll bewusst nicht umgesetzt werden?
+      placeholder: |
+        - kein ...
+        - keine ...
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Erwartete Tests
+      description: Welche Tests oder Referenzfaelle sollen entstehen?
+
