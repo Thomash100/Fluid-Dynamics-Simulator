@@ -62,10 +62,14 @@ internal static class SolverScenarioRunner
         return new SmallHydraulicNetworkSolver().Solve(input);
     }
 
-    public static string FormatResult(HydraulicSolverResult result, SolverScenarioParameters? parameters = null)
+    public static string FormatResult(
+        HydraulicSolverResult result,
+        SolverScenarioParameters? parameters = null,
+        UnitDisplaySettings? unitSettings = null)
     {
+        UnitDisplaySettings units = unitSettings ?? UnitDisplaySettings.Default;
+        SolverScenarioReport report = CreateReport(result, parameters, units);
         var builder = new StringBuilder();
-        IFormatProvider culture = CultureInfo.InvariantCulture;
 
         builder.AppendLine("Fluid Dynamics Simulator - Windows-App-Test");
         builder.AppendLine("Szenario: zwei parallele hydraulische Stränge mit bekannter Druckdifferenz");
@@ -73,44 +77,127 @@ internal static class SolverScenarioRunner
         {
             builder.AppendLine();
             builder.AppendLine("Eingaben:");
-            builder.AppendLine($"- Druckdifferenz: {parameters.PressureDifferencePascals.ToString("G6", culture)} Pa");
-            builder.AppendLine($"- Rohrdurchmesser: {parameters.PipeInnerDiameterMeters.ToString("G6", culture)} m");
-            builder.AppendLine($"- Zeta Strang A: {parameters.BranchAZeta.ToString("G6", culture)}");
-            builder.AppendLine($"- Zeta Strang B: {parameters.BranchBZeta.ToString("G6", culture)}");
-            builder.AppendLine($"- Gesamtvolumenstrom: {parameters.TotalVolumeFlowRateCubicMetersPerSecond.ToString("G6", culture)} m3/s");
+            builder.AppendLine(report.InputSummaryText);
         }
 
         builder.AppendLine();
-        builder.AppendLine($"Status: {FormatStatus(result.Status)}");
-        builder.AppendLine($"Iterationen: {result.Iterations}");
-        builder.AppendLine($"Finales Knotenbilanz-Residuum: {result.MaxNodeBalanceResidualCubicMetersPerSecond.ToString("G6", culture)} m3/s");
-        builder.AppendLine($"Finales Druck-Residuum: {result.MaxPressureResidualPascals.ToString("G6", culture)} Pa");
+        builder.AppendLine($"Status: {report.StatusText}");
+        builder.AppendLine($"Iterationen: {report.IterationsText}");
+        builder.AppendLine($"Finales Knotenbilanz-Residuum: {report.NodeResidualText}");
+        builder.AppendLine($"Finales Druck-Residuum: {report.PressureResidualText}");
+        builder.AppendLine($"Bewertung: {report.AssessmentText}");
+        if (!string.IsNullOrWhiteSpace(report.ReviewSummaryText))
+        {
+            builder.AppendLine();
+            builder.AppendLine("Prüfhinweise:");
+            builder.AppendLine(report.ReviewSummaryText);
+        }
+
         builder.AppendLine();
 
         builder.AppendLine("Strang-Volumenströme:");
-        foreach (KeyValuePair<string, double> volumeFlow in result.SolvedVolumetricFlowRatesCubicMetersPerSecond.OrderBy(item => item.Key))
+        foreach (BranchFlowReportRow volumeFlow in report.BranchFlows)
         {
-            builder.AppendLine($"- {FormatElementName(volumeFlow.Key)}: {volumeFlow.Value.ToString("G6", culture)} m3/s");
+            builder.AppendLine($"- {volumeFlow.BranchName}: {volumeFlow.VolumeFlowRateText}");
         }
 
         builder.AppendLine();
         builder.AppendLine("Druckresiduen:");
-        foreach (HydraulicPressureResidual residual in result.PressureResiduals.OrderBy(item => item.ElementId))
+        foreach (PressureResidualReportRow residual in report.PressureResiduals)
         {
             builder.AppendLine(
-                $"- {FormatElementName(residual.ElementId)}: Residuum {residual.ResidualPressurePascals.ToString("G6", culture)} Pa, " +
-                $"verfügbar {residual.AvailablePressureIncreasePascals.ToString("G6", culture)} Pa, " +
-                $"erforderlich {residual.RequiredPressureIncreasePascals.ToString("G6", culture)} Pa");
+                $"- {residual.ElementName}: Residuum {residual.ResidualText}, " +
+                $"verfügbar {residual.AvailablePressureText}, " +
+                $"erforderlich {residual.RequiredPressureText}");
         }
 
         builder.AppendLine();
         builder.AppendLine("Letzte Iterationen:");
-        foreach (HydraulicSolverIteration iteration in result.IterationHistory.TakeLast(8))
+        foreach (IterationReportRow iteration in report.Iterations.TakeLast(8))
         {
             builder.AppendLine(
-                $"- #{iteration.IterationNumber}: Knotenbilanz-Residuum " +
-                $"{iteration.MaxNodeBalanceResidualCubicMetersPerSecond.ToString("G6", culture)} m3/s, " +
-                $"Druck-Residuum {iteration.MaxPressureResidualPascals.ToString("G6", culture)} Pa");
+                $"- #{iteration.IterationNumberText}: Knotenbilanz-Residuum " +
+                $"{iteration.NodeResidualText}, Druck-Residuum {iteration.PressureResidualText}");
+        }
+
+        return builder.ToString();
+    }
+
+    public static SolverScenarioReport CreateReport(
+        HydraulicSolverResult result,
+        SolverScenarioParameters? parameters = null,
+        UnitDisplaySettings? unitSettings = null)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+
+        UnitDisplaySettings units = unitSettings ?? UnitDisplaySettings.Default;
+
+        var branchRows = result.SolvedVolumetricFlowRatesCubicMetersPerSecond
+            .OrderBy(item => item.Key, StringComparer.Ordinal)
+            .Select(item => new BranchFlowReportRow(
+                FormatElementName(item.Key),
+                units.FormatVolumeFlow(item.Value)))
+            .ToList();
+
+        var residualRows = result.PressureResiduals
+            .OrderBy(item => item.ElementId, StringComparer.Ordinal)
+            .Select(item => new PressureResidualReportRow(
+                FormatElementName(item.ElementId),
+                units.FormatPressure(item.ResidualPressurePascals),
+                units.FormatPressure(item.AvailablePressureIncreasePascals),
+                units.FormatPressure(item.RequiredPressureIncreasePascals)))
+            .ToList();
+
+        var iterationRows = result.IterationHistory
+            .Select(item => new IterationReportRow(
+                item.IterationNumber.ToString(CultureInfo.InvariantCulture),
+                units.FormatVolumeFlow(item.MaxNodeBalanceResidualCubicMetersPerSecond),
+                units.FormatPressure(item.MaxPressureResidualPascals)))
+            .ToList();
+
+        return new SolverScenarioReport(
+            FormatStatus(result.Status),
+            result.Iterations.ToString(CultureInfo.InvariantCulture),
+            units.FormatVolumeFlow(result.MaxNodeBalanceResidualCubicMetersPerSecond),
+            units.FormatPressure(result.MaxPressureResidualPascals),
+            SolverScenarioReview.CreateAssessment(result),
+            parameters is null ? string.Empty : FormatInputSummary(parameters, units),
+            parameters is null
+                ? string.Empty
+                : string.Join(Environment.NewLine, SolverScenarioReview.CreateMessages(parameters, result)),
+            branchRows,
+            residualRows,
+            iterationRows);
+    }
+
+    public static IReadOnlyList<PresetComparisonReportRow> CreatePresetComparison(UnitDisplaySettings? unitSettings = null)
+    {
+        UnitDisplaySettings units = unitSettings ?? UnitDisplaySettings.Default;
+
+        return SolverScenarioPreset.All
+            .Select(preset => CreatePresetComparisonRow(preset, units))
+            .ToList();
+    }
+
+    public static string FormatPresetComparison(
+        IReadOnlyList<PresetComparisonReportRow>? rows = null,
+        UnitDisplaySettings? unitSettings = null)
+    {
+        rows ??= CreatePresetComparison(unitSettings);
+
+        var builder = new StringBuilder();
+        builder.AppendLine("Preset-Vergleich:");
+
+        foreach (PresetComparisonReportRow row in rows)
+        {
+            builder.AppendLine(
+                $"- {row.ScenarioName}: Status {row.StatusText}, " +
+                $"Iterationen {row.IterationsText}, " +
+                $"Knotenbilanz {row.NodeResidualText}, " +
+                $"Druck {row.PressureResidualText}, " +
+                $"Strang A {row.BranchAFlowText}, " +
+                $"Strang B {row.BranchBFlowText}, " +
+                $"Bewertung {row.AssessmentText}");
         }
 
         return builder.ToString();
@@ -135,6 +222,50 @@ internal static class SolverScenarioRunner
             "branch-b" => "Strang B",
             _ => elementId,
         };
+    }
+
+    private static PresetComparisonReportRow CreatePresetComparisonRow(
+        SolverScenarioPreset preset,
+        UnitDisplaySettings unitSettings)
+    {
+        HydraulicSolverResult result = RunParallelBranchScenario(preset.Parameters);
+        SolverScenarioReport report = CreateReport(result, preset.Parameters, unitSettings);
+
+        return new PresetComparisonReportRow(
+            preset.Name,
+            report.StatusText,
+            report.IterationsText,
+            report.NodeResidualText,
+            report.PressureResidualText,
+            GetBranchFlow(report, "Strang A"),
+            GetBranchFlow(report, "Strang B"),
+            report.AssessmentText);
+    }
+
+    private static string GetBranchFlow(SolverScenarioReport report, string branchName)
+    {
+        return report.BranchFlows
+            .FirstOrDefault(row => row.BranchName == branchName)
+            ?.VolumeFlowRateText
+            ?? "-";
+    }
+
+    private static string FormatInputSummary(
+        SolverScenarioParameters parameters,
+        UnitDisplaySettings unitSettings)
+    {
+        return string.Join(
+            Environment.NewLine,
+            $"- Druckdifferenz: {unitSettings.FormatPressure(parameters.PressureDifferencePascals)}",
+            $"- Rohrdurchmesser: {unitSettings.FormatLength(parameters.PipeInnerDiameterMeters)}",
+            $"- Zeta Strang A: {FormatNumber(parameters.BranchAZeta)}",
+            $"- Zeta Strang B: {FormatNumber(parameters.BranchBZeta)}",
+            $"- Gesamtvolumenstrom: {unitSettings.FormatVolumeFlow(parameters.TotalVolumeFlowRateCubicMetersPerSecond)}");
+    }
+
+    private static string FormatNumber(double value)
+    {
+        return value.ToString("G6", CultureInfo.InvariantCulture);
     }
 
     private static HydraulicBranch CreateBranch(

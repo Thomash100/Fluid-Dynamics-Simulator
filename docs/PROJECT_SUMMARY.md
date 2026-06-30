@@ -33,6 +33,17 @@ Der Kurzname `FDS` und die technischen Namespaces `FDS.*` bleiben vorerst besteh
 - Der Referenzsolver dokumentiert Status, Iterationsverlauf, finale Fluesse, Knotenbilanzen und Druckresiduen.
 - Die WinForms-App kann den Referenzsolver als Smoke-Test und lokales Test-Harness ausfuehren.
 
+## Windows-App-Teststand
+
+| Baustein | Status |
+| --- | --- |
+| `samples/FDS.WindowsApp` | WinForms-Test-Harness fuer den kleinen Referenzsolver mit deutschen UI- und Ergebnistexten. |
+| Eingaben | Druckdifferenz in Pa, Rohrdurchmesser in m, Zeta-Werte fuer zwei parallele Straenge und Gesamtvolumenstrom in m3/s. |
+| Szenario-Presets | Referenzfall, hoehere Druckdifferenz und engeres Rohr als schnelle Vergleichsfaelle. |
+| Ergebnisanzeige | Uebersicht, Status, Iterationszahl, Knotenbilanz-Residual, Druck-Residual, Ergebnisbewertung, Pruefhinweise, Strang-Volumenstroeme, Druckresiduen, Iterationstabelle, Preset-Vergleich und Textausgabe. |
+| Smoke-Test | Implementiert ueber `FDS.WindowsApp.exe --smoke-test`; der Referenzfall konvergiert mit Residuen 0. |
+| Abgrenzung | Keine produktive UI und keine zusaetzliche Solver-Logik in der App. |
+
 ## Governance-Ergaenzungen
 
 Dieser Stand ergaenzt:

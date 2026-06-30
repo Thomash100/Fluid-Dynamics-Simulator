@@ -11,8 +11,11 @@ internal static class Program
         {
             TryConfigureConsoleOutputEncoding();
 
-            HydraulicSolverResult result = SolverScenarioRunner.RunParallelBranchScenario();
-            Console.WriteLine(SolverScenarioRunner.FormatResult(result));
+            SolverScenarioParameters parameters = SolverScenarioParameters.Default;
+            HydraulicSolverResult result = SolverScenarioRunner.RunParallelBranchScenario(parameters);
+            Console.WriteLine(SolverScenarioRunner.FormatResult(result, parameters));
+            Console.WriteLine();
+            Console.WriteLine(SolverScenarioRunner.FormatPresetComparison());
 
             int exitCode = result.Status == HydraulicSolverStatus.Converged ? 0 : 1;
             Environment.ExitCode = exitCode;
