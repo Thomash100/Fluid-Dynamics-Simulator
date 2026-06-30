@@ -62,9 +62,13 @@ internal static class SolverScenarioRunner
         return new SmallHydraulicNetworkSolver().Solve(input);
     }
 
-    public static string FormatResult(HydraulicSolverResult result, SolverScenarioParameters? parameters = null)
+    public static string FormatResult(
+        HydraulicSolverResult result,
+        SolverScenarioParameters? parameters = null,
+        UnitDisplaySettings? unitSettings = null)
     {
-        SolverScenarioReport report = CreateReport(result, parameters);
+        UnitDisplaySettings units = unitSettings ?? UnitDisplaySettings.Default;
+        SolverScenarioReport report = CreateReport(result, parameters, units);
         var builder = new StringBuilder();
 
         builder.AppendLine("Fluid Dynamics Simulator - Windows-App-Test");
@@ -121,40 +125,43 @@ internal static class SolverScenarioRunner
 
     public static SolverScenarioReport CreateReport(
         HydraulicSolverResult result,
-        SolverScenarioParameters? parameters = null)
+        SolverScenarioParameters? parameters = null,
+        UnitDisplaySettings? unitSettings = null)
     {
         ArgumentNullException.ThrowIfNull(result);
+
+        UnitDisplaySettings units = unitSettings ?? UnitDisplaySettings.Default;
 
         var branchRows = result.SolvedVolumetricFlowRatesCubicMetersPerSecond
             .OrderBy(item => item.Key, StringComparer.Ordinal)
             .Select(item => new BranchFlowReportRow(
                 FormatElementName(item.Key),
-                FormatVolumeFlow(item.Value)))
+                units.FormatVolumeFlow(item.Value)))
             .ToList();
 
         var residualRows = result.PressureResiduals
             .OrderBy(item => item.ElementId, StringComparer.Ordinal)
             .Select(item => new PressureResidualReportRow(
                 FormatElementName(item.ElementId),
-                FormatPressure(item.ResidualPressurePascals),
-                FormatPressure(item.AvailablePressureIncreasePascals),
-                FormatPressure(item.RequiredPressureIncreasePascals)))
+                units.FormatPressure(item.ResidualPressurePascals),
+                units.FormatPressure(item.AvailablePressureIncreasePascals),
+                units.FormatPressure(item.RequiredPressureIncreasePascals)))
             .ToList();
 
         var iterationRows = result.IterationHistory
             .Select(item => new IterationReportRow(
                 item.IterationNumber.ToString(CultureInfo.InvariantCulture),
-                FormatVolumeFlow(item.MaxNodeBalanceResidualCubicMetersPerSecond),
-                FormatPressure(item.MaxPressureResidualPascals)))
+                units.FormatVolumeFlow(item.MaxNodeBalanceResidualCubicMetersPerSecond),
+                units.FormatPressure(item.MaxPressureResidualPascals)))
             .ToList();
 
         return new SolverScenarioReport(
             FormatStatus(result.Status),
             result.Iterations.ToString(CultureInfo.InvariantCulture),
-            FormatVolumeFlow(result.MaxNodeBalanceResidualCubicMetersPerSecond),
-            FormatPressure(result.MaxPressureResidualPascals),
+            units.FormatVolumeFlow(result.MaxNodeBalanceResidualCubicMetersPerSecond),
+            units.FormatPressure(result.MaxPressureResidualPascals),
             SolverScenarioReview.CreateAssessment(result),
-            parameters is null ? string.Empty : FormatInputSummary(parameters),
+            parameters is null ? string.Empty : FormatInputSummary(parameters, units),
             parameters is null
                 ? string.Empty
                 : string.Join(Environment.NewLine, SolverScenarioReview.CreateMessages(parameters, result)),
@@ -163,16 +170,20 @@ internal static class SolverScenarioRunner
             iterationRows);
     }
 
-    public static IReadOnlyList<PresetComparisonReportRow> CreatePresetComparison()
+    public static IReadOnlyList<PresetComparisonReportRow> CreatePresetComparison(UnitDisplaySettings? unitSettings = null)
     {
+        UnitDisplaySettings units = unitSettings ?? UnitDisplaySettings.Default;
+
         return SolverScenarioPreset.All
-            .Select(CreatePresetComparisonRow)
+            .Select(preset => CreatePresetComparisonRow(preset, units))
             .ToList();
     }
 
-    public static string FormatPresetComparison(IReadOnlyList<PresetComparisonReportRow>? rows = null)
+    public static string FormatPresetComparison(
+        IReadOnlyList<PresetComparisonReportRow>? rows = null,
+        UnitDisplaySettings? unitSettings = null)
     {
-        rows ??= CreatePresetComparison();
+        rows ??= CreatePresetComparison(unitSettings);
 
         var builder = new StringBuilder();
         builder.AppendLine("Preset-Vergleich:");
@@ -213,10 +224,12 @@ internal static class SolverScenarioRunner
         };
     }
 
-    private static PresetComparisonReportRow CreatePresetComparisonRow(SolverScenarioPreset preset)
+    private static PresetComparisonReportRow CreatePresetComparisonRow(
+        SolverScenarioPreset preset,
+        UnitDisplaySettings unitSettings)
     {
         HydraulicSolverResult result = RunParallelBranchScenario(preset.Parameters);
-        SolverScenarioReport report = CreateReport(result, preset.Parameters);
+        SolverScenarioReport report = CreateReport(result, preset.Parameters, unitSettings);
 
         return new PresetComparisonReportRow(
             preset.Name,
@@ -237,30 +250,17 @@ internal static class SolverScenarioRunner
             ?? "-";
     }
 
-    private static string FormatInputSummary(SolverScenarioParameters parameters)
+    private static string FormatInputSummary(
+        SolverScenarioParameters parameters,
+        UnitDisplaySettings unitSettings)
     {
         return string.Join(
             Environment.NewLine,
-            $"- Druckdifferenz: {FormatPressure(parameters.PressureDifferencePascals)}",
-            $"- Rohrdurchmesser: {FormatLength(parameters.PipeInnerDiameterMeters)}",
+            $"- Druckdifferenz: {unitSettings.FormatPressure(parameters.PressureDifferencePascals)}",
+            $"- Rohrdurchmesser: {unitSettings.FormatLength(parameters.PipeInnerDiameterMeters)}",
             $"- Zeta Strang A: {FormatNumber(parameters.BranchAZeta)}",
             $"- Zeta Strang B: {FormatNumber(parameters.BranchBZeta)}",
-            $"- Gesamtvolumenstrom: {FormatVolumeFlow(parameters.TotalVolumeFlowRateCubicMetersPerSecond)}");
-    }
-
-    private static string FormatLength(double value)
-    {
-        return $"{FormatNumber(value)} m";
-    }
-
-    private static string FormatPressure(double value)
-    {
-        return $"{FormatNumber(value)} Pa";
-    }
-
-    private static string FormatVolumeFlow(double value)
-    {
-        return $"{FormatNumber(value)} m3/s";
+            $"- Gesamtvolumenstrom: {unitSettings.FormatVolumeFlow(parameters.TotalVolumeFlowRateCubicMetersPerSecond)}");
     }
 
     private static string FormatNumber(double value)
