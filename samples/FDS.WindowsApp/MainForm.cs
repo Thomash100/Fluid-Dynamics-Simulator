@@ -4,8 +4,20 @@ namespace FDS.WindowsApp;
 
 public sealed class MainForm : Form
 {
+    private readonly UnitDisplaySettings unitSettings = UnitDisplaySettings.Default;
+    private readonly ToolStripMenuItem pressurePascalMenuItem = CreateUnitMenuItem("Pa");
+    private readonly ToolStripMenuItem pressureKilopascalMenuItem = CreateUnitMenuItem("kPa");
+    private readonly ToolStripMenuItem pressureBarMenuItem = CreateUnitMenuItem("bar");
+    private readonly ToolStripMenuItem lengthMeterMenuItem = CreateUnitMenuItem("m");
+    private readonly ToolStripMenuItem lengthMillimeterMenuItem = CreateUnitMenuItem("mm");
+    private readonly ToolStripMenuItem volumeFlowCubicMetersPerSecondMenuItem = CreateUnitMenuItem("m³/s");
+    private readonly ToolStripMenuItem volumeFlowLitersPerSecondMenuItem = CreateUnitMenuItem("l/s");
+    private readonly ToolStripMenuItem volumeFlowCubicMetersPerHourMenuItem = CreateUnitMenuItem("m³/h");
     private readonly ComboBox presetComboBox;
     private readonly Label presetDescriptionLabel;
+    private readonly Label pressureDifferenceLabel;
+    private readonly Label pipeDiameterLabel;
+    private readonly Label totalFlowLabel;
     private readonly NumericUpDown pressureDifferenceInput;
     private readonly NumericUpDown pipeDiameterInput;
     private readonly NumericUpDown branchAZetaInput;
@@ -30,6 +42,19 @@ public sealed class MainForm : Form
         Text = "Fluid Dynamics Simulator - Windows-App-Test";
         MinimumSize = new Size(1080, 720);
         StartPosition = FormStartPosition.CenterScreen;
+
+        ConnectUnitMenuItems();
+        MenuStrip menuStrip = CreateMenuStrip();
+        MainMenuStrip = menuStrip;
+
+        var mainLayout = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 2,
+        };
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
         var root = new TableLayoutPanel
         {
@@ -96,15 +121,25 @@ public sealed class MainForm : Form
         parameterGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 190));
         parameterGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170));
 
-        pressureDifferenceInput = CreateNumericInput(0, 1_000_000, 100, decimalPlaces: 2);
-        pipeDiameterInput = CreateNumericInput(0.001M, 10, 0.01M, decimalPlaces: 4);
-        branchAZetaInput = CreateNumericInput(0, 10_000, 0.1M, decimalPlaces: 3);
-        branchBZetaInput = CreateNumericInput(0, 10_000, 0.1M, decimalPlaces: 3);
-        totalFlowInput = CreateNumericInput(0, 100, 0.001M, decimalPlaces: 8);
+        pressureDifferenceInput = CreateNumericInput();
+        pipeDiameterInput = CreateNumericInput();
+        branchAZetaInput = CreateNumericInput();
+        branchBZetaInput = CreateNumericInput();
+        totalFlowInput = CreateNumericInput();
 
-        AddInputRow(parameterGrid, 0, "Druckdifferenz Pa", pressureDifferenceInput, "Rohrdurchmesser m", pipeDiameterInput);
-        AddInputRow(parameterGrid, 1, "Zeta Strang A", branchAZetaInput, "Zeta Strang B", branchBZetaInput);
-        AddInputRow(parameterGrid, 2, "Gesamtvolumenstrom m3/s", totalFlowInput, string.Empty, null);
+        pressureDifferenceLabel = CreateInputLabel(string.Empty);
+        pipeDiameterLabel = CreateInputLabel(string.Empty);
+        totalFlowLabel = CreateInputLabel(string.Empty);
+
+        ConfigureUnitInputs();
+        UpdateUnitLabels();
+        UpdateUnitMenuChecks();
+        ConfigureNumericInput(branchAZetaInput, 0, 10_000, 0.1M, decimalPlaces: 3);
+        ConfigureNumericInput(branchBZetaInput, 0, 10_000, 0.1M, decimalPlaces: 3);
+
+        AddInputRow(parameterGrid, 0, pressureDifferenceLabel, pressureDifferenceInput, pipeDiameterLabel, pipeDiameterInput);
+        AddInputRow(parameterGrid, 1, CreateInputLabel("Zeta Strang A"), branchAZetaInput, CreateInputLabel("Zeta Strang B"), branchBZetaInput);
+        AddInputRow(parameterGrid, 2, totalFlowLabel, totalFlowInput, null, null);
 
         var commandPanel = new FlowLayoutPanel
         {
@@ -213,7 +248,9 @@ public sealed class MainForm : Form
         root.Controls.Add(topPanel, 0, 1);
         root.Controls.Add(resultTabs, 0, 2);
 
-        Controls.Add(root);
+        mainLayout.Controls.Add(menuStrip, 0, 0);
+        mainLayout.Controls.Add(root, 0, 1);
+        Controls.Add(mainLayout);
 
         presetComboBox.SelectedIndex = 0;
         SetInputValues(SolverScenarioParameters.Default);
@@ -230,7 +267,7 @@ public sealed class MainForm : Form
         {
             SolverScenarioParameters parameters = ReadInputValues();
             HydraulicSolverResult result = SolverScenarioRunner.RunParallelBranchScenario(parameters);
-            SolverScenarioReport report = SolverScenarioRunner.CreateReport(result, parameters);
+            SolverScenarioReport report = SolverScenarioRunner.CreateReport(result, parameters, unitSettings);
 
             statusLabel.Text = $"Status: {report.StatusText}";
             statusValueLabel.Text = report.StatusText;
@@ -243,7 +280,7 @@ public sealed class MainForm : Form
             branchFlowGrid.DataSource = report.BranchFlows.ToList();
             pressureResidualGrid.DataSource = report.PressureResiduals.ToList();
             iterationGrid.DataSource = report.Iterations.ToList();
-            outputTextBox.Text = SolverScenarioRunner.FormatResult(result, parameters);
+            outputTextBox.Text = SolverScenarioRunner.FormatResult(result, parameters, unitSettings);
         }
         catch (Exception ex)
         {
@@ -266,7 +303,7 @@ public sealed class MainForm : Form
     {
         try
         {
-            presetComparisonGrid.DataSource = SolverScenarioRunner.CreatePresetComparison().ToList();
+            presetComparisonGrid.DataSource = SolverScenarioRunner.CreatePresetComparison(unitSettings).ToList();
         }
         catch (Exception ex)
         {
@@ -295,21 +332,165 @@ public sealed class MainForm : Form
     {
         return new SolverScenarioParameters
         {
-            PressureDifferencePascals = (double)pressureDifferenceInput.Value,
-            PipeInnerDiameterMeters = (double)pipeDiameterInput.Value,
+            PressureDifferencePascals = unitSettings.ToPascals((double)pressureDifferenceInput.Value),
+            PipeInnerDiameterMeters = unitSettings.ToMeters((double)pipeDiameterInput.Value),
             BranchAZeta = (double)branchAZetaInput.Value,
             BranchBZeta = (double)branchBZetaInput.Value,
-            TotalVolumeFlowRateCubicMetersPerSecond = (double)totalFlowInput.Value,
+            TotalVolumeFlowRateCubicMetersPerSecond = unitSettings.ToCubicMetersPerSecond((double)totalFlowInput.Value),
         };
     }
 
     private void SetInputValues(SolverScenarioParameters parameters)
     {
-        pressureDifferenceInput.Value = ToDecimal(parameters.PressureDifferencePascals);
-        pipeDiameterInput.Value = ToDecimal(parameters.PipeInnerDiameterMeters);
+        pressureDifferenceInput.Value = ToDecimal(unitSettings.ToDisplayPressure(parameters.PressureDifferencePascals));
+        pipeDiameterInput.Value = ToDecimal(unitSettings.ToDisplayLength(parameters.PipeInnerDiameterMeters));
         branchAZetaInput.Value = ToDecimal(parameters.BranchAZeta);
         branchBZetaInput.Value = ToDecimal(parameters.BranchBZeta);
-        totalFlowInput.Value = ToDecimal(parameters.TotalVolumeFlowRateCubicMetersPerSecond);
+        totalFlowInput.Value = ToDecimal(unitSettings.ToDisplayVolumeFlow(parameters.TotalVolumeFlowRateCubicMetersPerSecond));
+    }
+
+    private MenuStrip CreateMenuStrip()
+    {
+        var menuStrip = new MenuStrip
+        {
+            Dock = DockStyle.Fill,
+        };
+
+        var settingsMenu = new ToolStripMenuItem("Einstellungen");
+        var unitsMenu = new ToolStripMenuItem("Einheiten");
+
+        var pressureMenu = new ToolStripMenuItem("Druck");
+        pressureMenu.DropDownItems.AddRange(
+            [
+                pressurePascalMenuItem,
+                pressureKilopascalMenuItem,
+                pressureBarMenuItem,
+            ]);
+
+        var lengthMenu = new ToolStripMenuItem("Länge / Durchmesser");
+        lengthMenu.DropDownItems.AddRange(
+            [
+                lengthMeterMenuItem,
+                lengthMillimeterMenuItem,
+            ]);
+
+        var volumeFlowMenu = new ToolStripMenuItem("Volumenstrom");
+        volumeFlowMenu.DropDownItems.AddRange(
+            [
+                volumeFlowCubicMetersPerSecondMenuItem,
+                volumeFlowLitersPerSecondMenuItem,
+                volumeFlowCubicMetersPerHourMenuItem,
+            ]);
+
+        unitsMenu.DropDownItems.AddRange(
+            [
+                pressureMenu,
+                lengthMenu,
+                volumeFlowMenu,
+            ]);
+        settingsMenu.DropDownItems.Add(unitsMenu);
+        menuStrip.Items.Add(settingsMenu);
+
+        return menuStrip;
+    }
+
+    private void ConnectUnitMenuItems()
+    {
+        pressurePascalMenuItem.Click += (_, _) => ChangePressureUnit(PressureDisplayUnit.Pascal);
+        pressureKilopascalMenuItem.Click += (_, _) => ChangePressureUnit(PressureDisplayUnit.Kilopascal);
+        pressureBarMenuItem.Click += (_, _) => ChangePressureUnit(PressureDisplayUnit.Bar);
+        lengthMeterMenuItem.Click += (_, _) => ChangeLengthUnit(LengthDisplayUnit.Meter);
+        lengthMillimeterMenuItem.Click += (_, _) => ChangeLengthUnit(LengthDisplayUnit.Millimeter);
+        volumeFlowCubicMetersPerSecondMenuItem.Click += (_, _) => ChangeVolumeFlowUnit(VolumeFlowDisplayUnit.CubicMetersPerSecond);
+        volumeFlowLitersPerSecondMenuItem.Click += (_, _) => ChangeVolumeFlowUnit(VolumeFlowDisplayUnit.LitersPerSecond);
+        volumeFlowCubicMetersPerHourMenuItem.Click += (_, _) => ChangeVolumeFlowUnit(VolumeFlowDisplayUnit.CubicMetersPerHour);
+    }
+
+    private void ChangePressureUnit(PressureDisplayUnit pressureUnit)
+    {
+        if (unitSettings.PressureUnit == pressureUnit)
+        {
+            return;
+        }
+
+        SolverScenarioParameters currentParameters = ReadInputValues();
+        unitSettings.PressureUnit = pressureUnit;
+        ApplyUnitSettings(currentParameters);
+    }
+
+    private void ChangeLengthUnit(LengthDisplayUnit lengthUnit)
+    {
+        if (unitSettings.LengthUnit == lengthUnit)
+        {
+            return;
+        }
+
+        SolverScenarioParameters currentParameters = ReadInputValues();
+        unitSettings.LengthUnit = lengthUnit;
+        ApplyUnitSettings(currentParameters);
+    }
+
+    private void ChangeVolumeFlowUnit(VolumeFlowDisplayUnit volumeFlowUnit)
+    {
+        if (unitSettings.VolumeFlowUnit == volumeFlowUnit)
+        {
+            return;
+        }
+
+        SolverScenarioParameters currentParameters = ReadInputValues();
+        unitSettings.VolumeFlowUnit = volumeFlowUnit;
+        ApplyUnitSettings(currentParameters);
+    }
+
+    private void ApplyUnitSettings(SolverScenarioParameters currentParameters)
+    {
+        ConfigureUnitInputs();
+        UpdateUnitLabels();
+        UpdateUnitMenuChecks();
+        SetInputValues(currentParameters);
+        RunScenario();
+        RunPresetComparison();
+    }
+
+    private void ConfigureUnitInputs()
+    {
+        ConfigureNumericInput(
+            pressureDifferenceInput,
+            0,
+            ToDecimal(unitSettings.ToDisplayPressure(1_000_000)),
+            unitSettings.PressureIncrement,
+            unitSettings.PressureDecimalPlaces);
+        ConfigureNumericInput(
+            pipeDiameterInput,
+            ToDecimal(unitSettings.ToDisplayLength(0.001)),
+            ToDecimal(unitSettings.ToDisplayLength(10)),
+            unitSettings.LengthIncrement,
+            unitSettings.LengthDecimalPlaces);
+        ConfigureNumericInput(
+            totalFlowInput,
+            0,
+            ToDecimal(unitSettings.ToDisplayVolumeFlow(100)),
+            unitSettings.VolumeFlowIncrement,
+            unitSettings.VolumeFlowDecimalPlaces);
+    }
+
+    private void UpdateUnitLabels()
+    {
+        pressureDifferenceLabel.Text = $"Druckdifferenz [{unitSettings.PressureUnitText}]";
+        pipeDiameterLabel.Text = $"Rohrdurchmesser [{unitSettings.LengthUnitText}]";
+        totalFlowLabel.Text = $"Gesamtvolumenstrom [{unitSettings.VolumeFlowUnitText}]";
+    }
+
+    private void UpdateUnitMenuChecks()
+    {
+        pressurePascalMenuItem.Checked = unitSettings.PressureUnit == PressureDisplayUnit.Pascal;
+        pressureKilopascalMenuItem.Checked = unitSettings.PressureUnit == PressureDisplayUnit.Kilopascal;
+        pressureBarMenuItem.Checked = unitSettings.PressureUnit == PressureDisplayUnit.Bar;
+        lengthMeterMenuItem.Checked = unitSettings.LengthUnit == LengthDisplayUnit.Meter;
+        lengthMillimeterMenuItem.Checked = unitSettings.LengthUnit == LengthDisplayUnit.Millimeter;
+        volumeFlowCubicMetersPerSecondMenuItem.Checked = unitSettings.VolumeFlowUnit == VolumeFlowDisplayUnit.CubicMetersPerSecond;
+        volumeFlowLitersPerSecondMenuItem.Checked = unitSettings.VolumeFlowUnit == VolumeFlowDisplayUnit.LitersPerSecond;
+        volumeFlowCubicMetersPerHourMenuItem.Checked = unitSettings.VolumeFlowUnit == VolumeFlowDisplayUnit.CubicMetersPerHour;
     }
 
     private TabPage CreateOverviewTab()
@@ -357,19 +538,40 @@ public sealed class MainForm : Form
         panel.Controls.Add(valueControl, 1, rowIndex);
     }
 
-    private static NumericUpDown CreateNumericInput(decimal minimum, decimal maximum, decimal increment, int decimalPlaces)
+    private static NumericUpDown CreateNumericInput()
     {
         return new NumericUpDown
         {
-            DecimalPlaces = decimalPlaces,
             Dock = DockStyle.Fill,
-            Increment = increment,
-            Maximum = maximum,
-            Minimum = minimum,
+            Maximum = 1_000_000_000,
+            Minimum = 0,
             TextAlign = HorizontalAlignment.Right,
             ThousandsSeparator = false,
             Width = 150,
         };
+    }
+
+    private static void ConfigureNumericInput(
+        NumericUpDown input,
+        decimal minimum,
+        decimal maximum,
+        decimal increment,
+        int decimalPlaces)
+    {
+        if (input.Value > maximum)
+        {
+            input.Value = maximum;
+        }
+
+        if (input.Value < minimum)
+        {
+            input.Value = minimum;
+        }
+
+        input.DecimalPlaces = decimalPlaces;
+        input.Minimum = minimum;
+        input.Maximum = maximum;
+        input.Increment = increment;
     }
 
     private static DataGridView CreateGrid(params (string Header, string PropertyName, int Width)[] columns)
@@ -430,19 +632,19 @@ public sealed class MainForm : Form
     private static void AddInputRow(
         TableLayoutPanel grid,
         int rowIndex,
-        string leftLabelText,
+        Control leftLabel,
         Control leftControl,
-        string rightLabelText,
+        Control? rightLabel,
         Control? rightControl)
     {
         grid.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
-        grid.Controls.Add(CreateInputLabel(leftLabelText), 0, rowIndex);
+        grid.Controls.Add(leftLabel, 0, rowIndex);
         grid.Controls.Add(leftControl, 1, rowIndex);
 
-        if (rightControl is not null)
+        if (rightLabel is not null && rightControl is not null)
         {
-            grid.Controls.Add(CreateInputLabel(rightLabelText), 2, rowIndex);
+            grid.Controls.Add(rightLabel, 2, rowIndex);
             grid.Controls.Add(rightControl, 3, rowIndex);
         }
     }
@@ -456,6 +658,14 @@ public sealed class MainForm : Form
             Padding = new Padding(0, 4, 12, 4),
             Text = text,
             TextAlign = ContentAlignment.MiddleLeft,
+        };
+    }
+
+    private static ToolStripMenuItem CreateUnitMenuItem(string text)
+    {
+        return new ToolStripMenuItem(text)
+        {
+            CheckOnClick = false,
         };
     }
 
