@@ -1,0 +1,168 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Thomash100/Global/main/docs/development/CODEX-PROJECTS.schema.json",
+  "schemaVersion": 1,
+  "registryVersion": "1.0.0",
+  "generatedAt": "2026-08-15T14:00:00+02:00",
+  "identityStandard": "global.development.identity@1.0.0",
+  "sourcePolicy": {
+    "scope": "project-local",
+    "localRepository": "Thomash100/Fluid-Dynamics-Simulator",
+    "globalRegistry": "https://github.com/Thomash100/Global/blob/main/docs/development/CODEX-PROJECTS.json",
+    "localStateWins": true,
+    "historyRewriteAllowed": false
+  },
+  "statusValues": [
+    "PLANNED",
+    "ACTIVE",
+    "TECHNICALLY_COMPLETE",
+    "MANUAL_REVIEW_REQUIRED",
+    "BLOCKED",
+    "READY_FOR_NEXT",
+    "INTEGRATED",
+    "RELEASED",
+    "SUPERSEDED"
+  ],
+  "projects": [
+    {
+      "projectCode": "FDS",
+      "projectName": "Fluid Dynamics Simulator",
+      "repositories": [
+        {
+          "repository": "Thomash100/Fluid-Dynamics-Simulator",
+          "role": "primary-product",
+          "defaultBranch": "main",
+          "status": "ACTIVE",
+          "note": "Kurzcode FDS ist für Fluid Dynamics Simulator reserviert; Fire Dynamics verwendet FIRE."
+        }
+      ],
+      "workstreams": [
+        {
+          "workstreamId": "FDS-VIS",
+          "workstreamName": "2D-Visualisierung und Netztopologie",
+          "chatTitle": "FDS-VIS – Fluid Dynamics Simulator – Visualisierung und Netzschema",
+          "repository": "Thomash100/Fluid-Dynamics-Simulator",
+          "identityState": "CANONICAL",
+          "phasePolicy": "strict",
+          "currentPhase": "P05",
+          "lastCompletedPhase": "P05",
+          "nextPlannedPhase": "P06",
+          "status": "TECHNICALLY_COMPLETE",
+          "branch": "feature/fds-network-topology",
+          "pullRequest": null,
+          "manualGate": null,
+          "phases": [
+            {
+              "phase": "P01",
+              "developmentId": "FDS-VIS.P01",
+              "title": "2D-Canvas-MVP",
+              "predecessor": null,
+              "status": "TECHNICALLY_COMPLETE",
+              "branch": "feature/fds-2d-canvas-mvp",
+              "commit": "c5fcecb",
+              "pullRequest": null,
+              "historicalIds": [
+                "feature/fds-2d-canvas-mvp"
+              ]
+            },
+            {
+              "phase": "P02",
+              "developmentId": "FDS-VIS.P02",
+              "title": "Manuelle Port-Verbindungen",
+              "predecessor": "FDS-VIS.P01",
+              "status": "TECHNICALLY_COMPLETE",
+              "branch": "feature/fds-port-connections",
+              "commit": "7c7b870",
+              "pullRequest": null,
+              "historicalIds": [
+                "feature/fds-port-connections"
+              ]
+            },
+            {
+              "phase": "P03",
+              "developmentId": "FDS-VIS.P03",
+              "title": "Orthogonales Verbindungsrouting",
+              "predecessor": "FDS-VIS.P02",
+              "status": "TECHNICALLY_COMPLETE",
+              "branch": "feature/fds-orthogonal-connections",
+              "commit": "85d4569",
+              "pullRequest": null,
+              "historicalIds": [
+                "feature/fds-orthogonal-connections"
+              ]
+            },
+            {
+              "phase": "P04",
+              "developmentId": "FDS-VIS.P04",
+              "title": "Deterministisches Hindernisrouting",
+              "predecessor": "FDS-VIS.P03",
+              "status": "TECHNICALLY_COMPLETE",
+              "branch": "feature/fds-obstacle-routing",
+              "commit": "49cfedb",
+              "pullRequest": null,
+              "historicalIds": [
+                "feature/fds-obstacle-routing"
+              ]
+            },
+            {
+              "phase": "P05",
+              "developmentId": "FDS-VIS.P05",
+              "title": "Gemeinsames Topologiemodell und Junctions",
+              "predecessor": "FDS-VIS.P04",
+              "status": "TECHNICALLY_COMPLETE",
+              "branch": "feature/fds-network-topology",
+              "commit": "5f7390dc8f",
+              "pullRequest": null,
+              "historicalIds": [
+                "feature/fds-network-topology"
+              ]
+            },
+            {
+              "phase": "P06",
+              "developmentId": "FDS-VIS.P06",
+              "title": "Topologiemodell an Hydraulik-Referenzsolver anbinden",
+              "predecessor": "FDS-VIS.P05",
+              "status": "PLANNED",
+              "branch": null,
+              "commit": null,
+              "pullRequest": null,
+              "historicalIds": []
+            }
+          ],
+          "historicalIds": [
+            "Visualisierung",
+            "Netztopologie"
+          ],
+          "legacyReferences": [
+            "docs/MANUAL_NETWORK_TOPOLOGY_TEST.md"
+          ],
+          "blockedReason": "P05 ist lokal committed und manuell geprüft, aber noch nicht auf GitHub veröffentlicht."
+        },
+        {
+          "workstreamId": "FDS-HYD",
+          "workstreamName": "Hydraulik und Referenzsolver",
+          "chatTitle": "FDS-HYD – Fluid Dynamics Simulator – Hydraulik und Solver",
+          "repository": "Thomash100/Fluid-Dynamics-Simulator",
+          "identityState": "LEGACY_UNPHASED",
+          "phasePolicy": "legacy-gaps",
+          "currentPhase": null,
+          "lastCompletedPhase": null,
+          "nextPlannedPhase": null,
+          "status": "ACTIVE",
+          "branch": "main",
+          "pullRequest": "https://github.com/Thomash100/Fluid-Dynamics-Simulator/pull/17",
+          "manualGate": null,
+          "phases": [],
+          "historicalIds": [
+            "Phase 1",
+            "v0.3.0-hydraulics"
+          ],
+          "legacyReferences": [
+            "Issues #19-#24",
+            "PR #17"
+          ],
+          "blockedReason": "Roadmap-Phasen und Milestones sind noch nicht als Development-Phasen registriert."
+        }
+      ]
+    }
+  ]
+}
